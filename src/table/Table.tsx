@@ -20,6 +20,7 @@ import Checkbox from "./Checkbox";
 import Button from "./Button";
 import IconButton from "./IconButton";
 import Select from "./Select";
+import Popover from "./Popover";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -38,6 +39,7 @@ const ACTIONS = {
 	ROWS_PER_PAGE_SET: "rows_per_page_set",
 	COL_SET_WIDTH: "col_set_width",
 	SEARCH_QUERY_SET: "serch_query_set",
+	COL_TOGGLE_VISIBILITY: "col_toggle_visibility",
 };
 
 function reducer<RowType>(
@@ -68,14 +70,34 @@ function reducer<RowType>(
 			return { ...state, selectedPage: action.payload.pageAmount - 1 };
 		case ACTIONS.ROWS_PER_PAGE_SET:
 			return { ...state, rowsPerPage: action.payload.rowsPerPage };
-		case ACTIONS.COL_SET_WIDTH:
+		case ACTIONS.COL_SET_WIDTH: {
+			const colState = state.columns.get(action.payload.field);
+			if (!colState) return state;
+
 			return {
 				...state,
-				columns: state.columns.set(action.payload.field, {
-					...state.columns.get(action.payload.field),
-					width: action.payload.width,
-				}),
+				columns: new Map(
+					state.columns.set(action.payload.field, {
+						...colState,
+						width: action.payload.width,
+					}),
+				),
 			};
+		}
+		case ACTIONS.COL_TOGGLE_VISIBILITY: {
+			const colState = state.columns.get(action.payload.field);
+			if (!colState) return state;
+
+			return {
+				...state,
+				columns: new Map(
+					state.columns.set(action.payload.field, {
+						...colState,
+						visible: !colState.visible,
+					}),
+				),
+			};
+		}
 		case ACTIONS.SEARCH_QUERY_SET:
 			return {
 				...state,
@@ -166,6 +188,7 @@ function Table<RowType extends Object>({
 	props.columns.forEach((column) => {
 		initalColumns.set(column.field, {
 			width: column.initialWidth ?? 160,
+			visible: column.isVisible ?? true,
 		});
 	});
 
@@ -181,6 +204,14 @@ function Table<RowType extends Object>({
 	};
 	const [state, dispatch] = useReducer(reducer, initialState);
 
+	const visibleCols = useMemo(
+		() =>
+			[...props.columns].filter(
+				(col) => state.columns.get(col.field)?.visible,
+			),
+		[props.columns, state.columns],
+	);
+
 	const rows: TableRow<RowType>[] = useMemo(() => {
 		return [...(props.rows ?? [])].map((row, index) => ({
 			...row,
@@ -193,7 +224,10 @@ function Table<RowType extends Object>({
 		const upperCaseSearchQuery = state.searchQuery.toUpperCase();
 		const newRows = [...(rows ?? [])].filter((row) => {
 			const keys = Object.keys(row) as [keyof RowType];
+
 			return keys.some((key) => {
+				if (!state.columns.get(key)?.visible) return false;
+
 				const cellValue = row[key];
 				return String(cellValue)
 					.toUpperCase()
@@ -201,7 +235,7 @@ function Table<RowType extends Object>({
 			});
 		});
 		return newRows;
-	}, [rows, state.searchQuery]);
+	}, [rows, state.searchQuery, state.columns]);
 
 	// Berechnung der Seitenanzahl
 	const pageAmount = useMemo(() => {
@@ -213,6 +247,9 @@ function Table<RowType extends Object>({
 
 	// Sortierung anhand der ausgewählten Spalte und Richtung
 	const sortedRows = useMemo(() => {
+		if (!state.columns.get(state.sorting.field)?.visible)
+			return [...filteredRows];
+
 		const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
 			const valueA = Number(rowA[state.sorting.field]);
 			const valueB = Number(rowB[state.sorting.field]);
@@ -285,7 +322,42 @@ function Table<RowType extends Object>({
 					{/* Grid Optionen */}
 					<div className="flex gap-x-2 items-center h-full">
 						<IconButton icon="funnel"></IconButton>
-						<IconButton icon="columns-3-cog"></IconButton>
+						<Popover
+							trigger={
+								<IconButton icon="columns-3-cog"></IconButton>
+							}
+						>
+							<div className="flex flex-col">
+								{props.columns.map((column, index) => (
+									<div
+										key={`col-toggle-${index}`}
+										className={`${
+											state.columns.get(column.field)
+												?.visible
+												? "bg-blue-50 hover:bg-blue-100"
+												: "hover:bg-slate-100"
+										} h-8.5 flex gap-x-2 px-2 items-center`}
+									>
+										<Checkbox
+											checked={
+												state.columns.get(column.field)
+													?.visible
+											}
+											onChange={() =>
+												dispatch({
+													type: ACTIONS.COL_TOGGLE_VISIBILITY,
+													payload: {
+														field: column.field,
+													},
+												})
+											}
+										></Checkbox>
+										<span>{column.title}</span>
+									</div>
+								))}
+							</div>
+						</Popover>
+
 						<IconButton
 							icon="refresh-ccw-dot"
 							onClick={() =>
@@ -348,7 +420,7 @@ function Table<RowType extends Object>({
 						{/* 
 							Restlichen Header
 						*/}
-						{props.columns?.map((column, headerIndex) => (
+						{visibleCols.map((column, headerIndex) => (
 							<Header
 								key={`header-${headerIndex}`}
 								tableState={state}
@@ -383,7 +455,7 @@ function Table<RowType extends Object>({
 								</div>
 
 								{/* Restliche Zellen */}
-								{props.columns.map((column, cellIndex) => (
+								{visibleCols.map((column, cellIndex) => (
 									<div
 										key={`row-${rowIndex}-cell-${cellIndex}`}
 										className="px-2 overflow-hidden text-ellipsis min-w-28"

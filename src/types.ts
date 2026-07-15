@@ -5,6 +5,7 @@ export interface Column<RowType, ColKey extends keyof RowType = keyof RowType> {
 	initialWidth?: number;
 	isSortable?: boolean;
 	isResizable?: boolean;
+	isVisible?: boolean;
 }
 
 export type TableRow<RowType> = RowType & {
@@ -26,6 +27,7 @@ export interface TableState<RowType> {
 
 export interface ColumnState {
 	width: number;
+	visible: boolean;
 }
 
 export interface TableAction {

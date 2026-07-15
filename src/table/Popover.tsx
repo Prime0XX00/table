@@ -35,6 +35,28 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 		});
 	}, [visible]);
 
+	useEffect(() => {
+		const handleClickOutside = (e: any) => {
+			if (!triggerRef.current) return;
+			if (!popoverRef.current) return;
+			if (!visible) return;
+
+			const isOutside =
+				!triggerRef.current.contains(e.target) &&
+				!popoverRef.current.contains(e.target);
+
+			if (isOutside) {
+				setVisible(false);
+			}
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [triggerRef, popoverRef, visible]);
+
 	return (
 		<>
 			{React.cloneElement(props.trigger, {
