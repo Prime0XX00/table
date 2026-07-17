@@ -10,6 +10,7 @@ import {
 	FILTER_OPERATORS,
 	type Column,
 	type ColumnState,
+	type CreateColumnUnion,
 	type Filter,
 	type FilterOperator,
 	type RowsPerPageOption,
@@ -29,7 +30,7 @@ import Input from "./Input";
 interface TableProps<RowType extends Object> {
 	title: string;
 	rows: Array<RowType> | undefined;
-	columns: Column<RowType>[];
+	columns: CreateColumnUnion<RowType>[];
 	rowsPerPageOptions?: RowsPerPageOption[];
 }
 

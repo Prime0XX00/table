@@ -3,13 +3,13 @@ import Table from "./table/Table";
 type Article = {
 	id: number;
 	data: number;
-	percent: number;
+	percent: string;
 };
 
 const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 	id: index,
 	data: Number((100 * Math.random()).toFixed(2)),
-	percent: Number((100 * Math.random()).toFixed(2)),
+	percent: (100 * Math.random()).toFixed(2),
 }));
 
 function App() {

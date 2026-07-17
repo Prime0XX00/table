@@ -1,5 +1,10 @@
+export type CreateColumnUnion<RowType> = {
+	[P in keyof RowType]: Column<RowType, P>;
+}[keyof RowType];
+
 export interface Column<RowType, ColKey extends keyof RowType = keyof RowType> {
 	field: ColKey;
+	type?: any;
 	title: string;
 	render?: (cellValue: RowType[ColKey]) => React.ReactNode;
 	initialWidth?: number;
@@ -47,6 +52,11 @@ export const FILTER_OPERATORS = {
 	LTE: "<=",
 	GT: ">",
 	GTE: ">=",
+};
+
+export const STRING_FILTER_OPERATORS = {
+	EQUAL: "Gleich",
+	CONTAINS: "Enthält",
 };
 
 export interface ColumnState {
