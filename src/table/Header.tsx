@@ -46,6 +46,7 @@ function Header<RowType>({ ...props }: HeaderProps<RowType>) {
 							onClick={() => props.toggleSort(props.column)}
 						></IconButton>
 					)}
+
 					<IconButton
 						icon="ellipsis-vertical"
 						className="group-hover:opacity-100 opacity-0"

@@ -2,14 +2,14 @@ import Table from "./table/Table";
 
 type Article = {
 	id: number;
-	data: string;
-	percent: string;
+	data: number;
+	percent: number;
 };
 
-const rows: Article[] = Array.from({ length: 6133 }).map((_, index) => ({
+const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 	id: index,
-	data: (100 * Math.random()).toFixed(2),
-	percent: (100 * Math.random()).toFixed(2),
+	data: Number((100 * Math.random()).toFixed(2)),
+	percent: Number((100 * Math.random()).toFixed(2)),
 }));
 
 function App() {
@@ -28,6 +28,7 @@ function App() {
 						field: "data",
 						title: "Daten",
 						isSortable: true,
+						isPinned: true,
 					},
 					{
 						field: "percent",

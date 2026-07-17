@@ -1,5 +1,22 @@
-import React, { useEffect, useRef, useState, type ReactElement } from "react";
+import React, {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type ReactElement,
+} from "react";
 import { createPortal } from "react-dom";
+
+interface PopoverNestingContextValue {
+	registerDescendant: (el: HTMLElement) => () => void;
+}
+
+const PopoverNestingContext = createContext<PopoverNestingContextValue | null>(
+	null,
+);
 
 interface PopoverProps {
 	trigger: ReactElement<{
@@ -14,15 +31,40 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 		left: 0,
 		top: 0,
 	});
-
 	const [visible, setVisible] = useState(false);
 
 	const triggerRef = useRef<HTMLElement>(null);
 	const popoverRef = useRef<HTMLDivElement>(null);
+	const descendantNodes = useRef<Set<HTMLElement>>(new Set());
+
+	// Vom übergeordneten Popover (falls vorhanden) bereitgestellter Context
+	const parentContext = useContext(PopoverNestingContext);
 
 	function toggle() {
 		setVisible((prev) => !prev);
 	}
+
+	// Registriert ein Nachfahren-DOM-Element bei diesem Popover UND
+	// reicht die Registrierung an alle weiteren Vorfahren weiter
+	const registerDescendant = useCallback(
+		(el: HTMLElement) => {
+			descendantNodes.current.add(el);
+			const unregisterFromParent = parentContext?.registerDescendant(el);
+
+			return () => {
+				descendantNodes.current.delete(el);
+				unregisterFromParent?.();
+			};
+		},
+		[parentContext],
+	);
+
+	// Sobald dieses Popover sichtbar ist, meldet es seinen eigenen
+	// (portalten) Content-Knoten beim Elternteil an
+	useEffect(() => {
+		if (!visible || !popoverRef.current || !parentContext) return;
+		return parentContext.registerDescendant(popoverRef.current);
+	}, [visible, parentContext]);
 
 	useEffect(() => {
 		if (!visible || !triggerRef.current || !popoverRef.current) return;
@@ -36,26 +78,34 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 	}, [visible]);
 
 	useEffect(() => {
-		const handleClickOutside = (e: any) => {
+		const handleClickOutside = (e: MouseEvent) => {
 			if (!triggerRef.current) return;
 			if (!popoverRef.current) return;
 			if (!visible) return;
 
-			const isOutside =
-				!triggerRef.current.contains(e.target) &&
-				!popoverRef.current.contains(e.target);
+			const target = e.target as Node;
 
-			if (isOutside) {
+			const isInsideTrigger = triggerRef.current.contains(target);
+			const isInsideContent = popoverRef.current.contains(target);
+			const isInsideDescendant = Array.from(descendantNodes.current).some(
+				(node) => node.contains(target),
+			);
+
+			if (!isInsideTrigger && !isInsideContent && !isInsideDescendant) {
 				setVisible(false);
 			}
 		};
 
 		document.addEventListener("mousedown", handleClickOutside);
-
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [triggerRef, popoverRef, visible]);
+	}, [visible]);
+
+	const nestingContextValue = useMemo<PopoverNestingContextValue>(
+		() => ({ registerDescendant }),
+		[registerDescendant],
+	);
 
 	return (
 		<>
@@ -68,10 +118,14 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 				createPortal(
 					<div
 						ref={popoverRef}
-						className="border border-slate-300 py-2 rounded-sm bg-white absolute shadow-lg"
+						className="z-100 border border-slate-300 py-2 rounded-sm bg-white absolute shadow-lg"
 						style={{ left: position.left, top: position.top }}
 					>
-						{props.children}
+						<PopoverNestingContext.Provider
+							value={nestingContextValue}
+						>
+							{props.children}
+						</PopoverNestingContext.Provider>
 					</div>,
 					document.body,
 				)}

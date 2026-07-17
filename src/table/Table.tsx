@@ -6,13 +6,16 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import HeaderResizer from "./HeaderResizer";
-import type {
-	Column,
-	ColumnState,
-	RowsPerPageOption,
-	TableAction,
-	TableRow,
-	TableState,
+import {
+	FILTER_OPERATORS,
+	type Column,
+	type ColumnState,
+	type Filter,
+	type FilterOperator,
+	type RowsPerPageOption,
+	type TableAction,
+	type TableRow,
+	type TableState,
 } from "../types";
 import Header from "./Header";
 import TableSearchField from "./TableSearchField";
@@ -21,145 +24,286 @@ import Button from "./Button";
 import IconButton from "./IconButton";
 import Select from "./Select";
 import Popover from "./Popover";
+import Input from "./Input";
 
 interface TableProps<RowType extends Object> {
 	title: string;
 	rows: Array<RowType> | undefined;
-	columns: Column<RowType, keyof RowType>[];
+	columns: Column<RowType>[];
 	rowsPerPageOptions?: RowsPerPageOption[];
-}
-
-const ACTIONS = {
-	STATE_SET: "state_set",
-	SORT_TOGGLE: "sort_toggle",
-	PAGE_SET_FIRST: "page_set_first",
-	PAGE_SET_PREV: "page_set_prev",
-	PAGE_SET_NEXT: "page_set_next",
-	PAGE_SET_LAST: "page_set_last",
-	ROWS_PER_PAGE_SET: "rows_per_page_set",
-	COL_SET_WIDTH: "col_set_width",
-	SEARCH_QUERY_SET: "serch_query_set",
-	COL_TOGGLE_VISIBILITY: "col_toggle_visibility",
-};
-
-function reducer<RowType>(
-	state: TableState<RowType>,
-	action: TableAction,
-): TableState<RowType> {
-	switch (action.type) {
-		case ACTIONS.STATE_SET:
-			return action.payload.state;
-		case ACTIONS.SORT_TOGGLE:
-			return toggleSortReducer(action.payload.column, state);
-		case ACTIONS.PAGE_SET_FIRST:
-			return { ...state, selectedPage: 0 };
-		case ACTIONS.PAGE_SET_PREV:
-			return {
-				...state,
-				selectedPage: Math.max(state.selectedPage - 1, 0),
-			};
-		case ACTIONS.PAGE_SET_NEXT:
-			return {
-				...state,
-				selectedPage: Math.min(
-					state.selectedPage + 1,
-					action.payload.pageAmount - 1,
-				),
-			};
-		case ACTIONS.PAGE_SET_LAST:
-			return { ...state, selectedPage: action.payload.pageAmount - 1 };
-		case ACTIONS.ROWS_PER_PAGE_SET:
-			return { ...state, rowsPerPage: action.payload.rowsPerPage };
-		case ACTIONS.COL_SET_WIDTH: {
-			const colState = state.columns.get(action.payload.field);
-			if (!colState) return state;
-
-			return {
-				...state,
-				columns: new Map(
-					state.columns.set(action.payload.field, {
-						...colState,
-						width: action.payload.width,
-					}),
-				),
-			};
-		}
-		case ACTIONS.COL_TOGGLE_VISIBILITY: {
-			const colState = state.columns.get(action.payload.field);
-			if (!colState) return state;
-
-			return {
-				...state,
-				columns: new Map(
-					state.columns.set(action.payload.field, {
-						...colState,
-						visible: !colState.visible,
-					}),
-				),
-			};
-		}
-		case ACTIONS.SEARCH_QUERY_SET:
-			return {
-				...state,
-				searchQuery: action.payload.searchQuery,
-			};
-	}
-	return state;
-}
-
-function toggleSortReducer<RowType>(
-	column: Column<RowType, keyof RowType>,
-	state: TableState<RowType>,
-): TableState<RowType> {
-	// Checken, ob die Spalte überhaupt sortiert werden kann.
-	if (!column.isSortable) return state;
-
-	// Wenn neues Feld ausgewählt wird
-	// Da nur ein Richtungs-State für die gesamte Tabelle existiert, wird sobald die Spalte gewechselt wird
-	// der State zurück auf ASC gesetzt
-	if (state.sorting.field != column.field) {
-		state.sorting.field = column.field;
-		return {
-			...state,
-			sorting: {
-				...state.sorting,
-				field: column.field,
-				direction: "asc",
-			},
-		};
-	}
-	// Wenn altes Feld erneut ausgewählt wird
-	// Einfaches Umschalten der Richtung
-	else {
-		if (state.sorting.direction == "asc")
-			return {
-				...state,
-				sorting: {
-					...state.sorting,
-					field: column.field,
-					direction: "desc",
-				},
-			};
-		else
-			return {
-				...state,
-				sorting: {
-					...state.sorting,
-					field: column.field,
-					direction: "asc",
-				},
-			};
-	}
 }
 
 function Table<RowType extends Object>({
 	rowsPerPageOptions = [{ value: 10 }, { value: 20 }, { value: 50 }],
 	...props
 }: TableProps<RowType>) {
+	// Startwerte für Cols
+	const initalColumns = new Map<keyof RowType, ColumnState>();
+
+	props.columns.forEach((column) => {
+		initalColumns.set(column.field, {
+			width: column.initialWidth ?? 160,
+			visible: column.isVisible ?? true,
+			pinned: false,
+		});
+	});
+
+	// Startwerte für die Tabelle
+	const initialState: TableState<RowType> = {
+		selectedPage: 0,
+		rowsPerPage: rowsPerPageOptions[0].value,
+		sorting: {
+			field: props.columns[0].field,
+			direction: "asc",
+		},
+		columns: initalColumns,
+		searchQuery: "",
+		filters: {
+			filters: [
+				{
+					field: props.columns[0].field,
+					operator: "=",
+					value: "",
+				},
+			],
+			connection: "and",
+		},
+	};
+	const [state, dispatch] = useReducer(tableReducer, initialState);
+
+	function tableReducer(
+		state: TableState<RowType>,
+		action: TableAction<RowType>,
+	): TableState<RowType> {
+		switch (action.type) {
+			// Funktion zum Setzen des gesamten Tabellenstatus.
+			// Verwenden, um den Initialen State und optional noch Presets zu laden.
+			case "STATE_SET":
+				return action.payload.state;
+
+			// Sortierfunktionalität
+			// Entweder wird die momentane Suche getoggelt oder eine neue Spalte zur Suche ausgewählt
+			case "SORT_TOGGLE": {
+				const column = action.payload.column;
+
+				// Checken, ob die Spalte überhaupt sortiert werden kann.
+				if (!column.isSortable) return state;
+
+				// Wenn neues Feld ausgewählt wird
+				// Da nur ein Richtungs-State für die gesamte Tabelle existiert, wird sobald die Spalte gewechselt wird
+				// der State zurück auf ASC gesetzt
+				if (state.sorting.field != column.field) {
+					state.sorting.field = column.field;
+					return {
+						...state,
+						sorting: {
+							...state.sorting,
+							field: column.field,
+							direction: "asc",
+						},
+					};
+				}
+				// Wenn altes Feld erneut ausgewählt wird
+				// Einfaches Umschalten der Richtung
+				else {
+					if (state.sorting.direction == "asc")
+						return {
+							...state,
+							sorting: {
+								...state.sorting,
+								field: column.field,
+								direction: "desc",
+							},
+						};
+					else
+						return {
+							...state,
+							sorting: {
+								...state.sorting,
+								field: column.field,
+								direction: "asc",
+							},
+						};
+				}
+			}
+
+			// Erste Seite auswählen
+			case "PAGE_SET_FIRST":
+				return { ...state, selectedPage: 0 };
+
+			// Vorherige Seite auswählen
+			case "PAGE_SET_PREV":
+				return {
+					...state,
+					selectedPage: Math.max(state.selectedPage - 1, 0),
+				};
+
+			// Nächste Seite auswählen
+			case "PAGE_SET_NEXT":
+				return {
+					...state,
+					selectedPage: Math.min(
+						state.selectedPage + 1,
+						action.payload.pageAmount - 1,
+					),
+				};
+
+			// Letzte Seite auswählen
+			case "PAGE_SET_LAST":
+				return {
+					...state,
+					selectedPage: action.payload.pageAmount - 1,
+				};
+
+			// Reihen pro Tabellenseite steuern
+			case "ROWS_PER_PAGE_SET":
+				return { ...state, rowsPerPage: action.payload.rowsPerPage };
+
+			// Breite einer Spalte regulieren
+			case "COL_SET_WIDTH": {
+				const colState = state.columns.get(action.payload.field);
+				if (!colState) return state;
+
+				return {
+					...state,
+					columns: new Map(
+						state.columns.set(action.payload.field, {
+							...colState,
+							width: action.payload.width,
+						}),
+					),
+				};
+			}
+
+			// Toggeln der Sichtbarkeit einer Spalte
+			case "COL_TOGGLE_VISIBILITY": {
+				const colState = state.columns.get(action.payload.field);
+				if (!colState) return state;
+
+				return {
+					...state,
+					columns: new Map(
+						state.columns.set(action.payload.field, {
+							...colState,
+							visible: !colState.visible,
+						}),
+					),
+				};
+			}
+
+			// Suchkeywort verwalten
+			case "SEARCH_QUERY_SET":
+				return {
+					...state,
+					searchQuery: action.payload.searchQuery,
+				};
+
+			// Die Änderung an einem Filter händeln
+			// Hier kann die betroffene Spalte, der Filteroperand und der Wert angepasst werden
+			case "FILTER_CHANGE":
+				const newFilter = {
+					field: action.payload.filter.field,
+					operator: action.payload.filter.operator,
+					value: action.payload.filter.value,
+				};
+
+				const updatedFilters = state.filters.filters.map(
+					(filter, index) => {
+						if (action.payload.index == index) {
+							return newFilter;
+						} else return filter;
+					},
+				);
+
+				return {
+					...state,
+					filters: {
+						...state.filters,
+						filters: updatedFilters,
+					},
+				};
+
+			// Toggle zwischen UND und ODER zur Verkettung von Filtern
+			case "FILTER_CONNECTION_TOGGLE":
+				return {
+					...state,
+					filters: {
+						...state.filters,
+						connection:
+							state.filters.connection == "and" ? "or" : "and",
+					},
+				};
+
+			// Löschen eines anhand des Array-Indezes gewählten Filters
+			case "FILTER_DELETE":
+				if (state.filters.filters.length == 1)
+					return {
+						...state,
+						filters: {
+							...state.filters,
+							filters: [
+								{
+									field: props.columns[0].field,
+									operator: "=",
+									value: "",
+								},
+							],
+						},
+					};
+
+				const newFilters = [...state.filters.filters].filter(
+					(_, index) => {
+						return index != action.payload.index;
+					},
+				);
+
+				return {
+					...state,
+					filters: {
+						...state.filters,
+						filters: newFilters,
+					},
+				};
+
+			// Hinzufügen eines neuen Filters
+			case "FILTER_ADD":
+				return {
+					...state,
+					filters: {
+						...state.filters,
+						filters: [
+							...state.filters.filters,
+							{
+								field: props.columns[0].field,
+								operator: "=",
+								value: "",
+							},
+						],
+					},
+				};
+
+			// Alle Filter löschen und den ersten zurücksetzen
+			case "FILTERS_RESET":
+				return {
+					...state,
+					filters: {
+						...state.filters,
+						filters: [
+							{
+								field: props.columns[0].field,
+								operator: "=",
+								value: "",
+							},
+						],
+					},
+				};
+		}
+	}
+
 	// Demo
-	function setWidth<RowType>(field: keyof RowType, width: number) {
+	function setWidth(field: keyof RowType, width: number) {
 		dispatch({
-			type: ACTIONS.COL_SET_WIDTH,
+			type: "COL_SET_WIDTH",
 			payload: {
 				field: field,
 				width: width,
@@ -170,7 +314,7 @@ function Table<RowType extends Object>({
 	// Demo
 	function toggleSort(column: Column<RowType>) {
 		dispatch({
-			type: ACTIONS.SORT_TOGGLE,
+			type: "SORT_TOGGLE",
 			payload: { column: column },
 		});
 	}
@@ -178,31 +322,10 @@ function Table<RowType extends Object>({
 	// Demo
 	function changeSearchQuery(newSearchQuery: string) {
 		dispatch({
-			type: ACTIONS.SEARCH_QUERY_SET,
+			type: "SEARCH_QUERY_SET",
 			payload: { searchQuery: newSearchQuery },
 		});
 	}
-
-	const initalColumns = new Map<keyof RowType, ColumnState>();
-
-	props.columns.forEach((column) => {
-		initalColumns.set(column.field, {
-			width: column.initialWidth ?? 160,
-			visible: column.isVisible ?? true,
-		});
-	});
-
-	const initialState: TableState<RowType> = {
-		selectedPage: 0,
-		rowsPerPage: rowsPerPageOptions[0].value,
-		sorting: {
-			field: props.columns[0].field,
-			direction: "asc",
-		},
-		columns: initalColumns,
-		searchQuery: "",
-	};
-	const [state, dispatch] = useReducer(reducer, initialState);
 
 	const visibleCols = useMemo(
 		() =>
@@ -221,6 +344,7 @@ function Table<RowType extends Object>({
 
 	// Filtern der Zeilen anhand der SearchQuery
 	const filteredRows = useMemo(() => {
+		// Suchen
 		const upperCaseSearchQuery = state.searchQuery.toUpperCase();
 		const newRows = [...(rows ?? [])].filter((row) => {
 			const keys = Object.keys(row) as [keyof RowType];
@@ -234,8 +358,52 @@ function Table<RowType extends Object>({
 					.includes(upperCaseSearchQuery);
 			});
 		});
-		return newRows;
-	}, [rows, state.searchQuery, state.columns]);
+
+		// Filterung
+		const filters = state.filters.filters.filter(
+			(filter) => filter.value != "",
+		);
+		if (filters.length == 0) return newRows;
+
+		const filteredNewRows = newRows.filter((row) => {
+			switch (state.filters.connection) {
+				case "and":
+					return filters.every((filter) => {
+						return dynamicFilter(row, filter);
+					});
+				case "or":
+					return filters.some((filter) => {
+						return dynamicFilter(row, filter);
+					});
+			}
+		});
+
+		return filteredNewRows;
+	}, [rows, state.searchQuery, state.columns, state.filters]);
+
+	function dynamicFilter(
+		row: TableRow<RowType>,
+		filter: Filter<RowType>,
+	): boolean {
+		const cellValue = row[filter.field];
+
+		switch (filter.operator) {
+			case FILTER_OPERATORS.E:
+				return cellValue == filter.value;
+			case FILTER_OPERATORS.LT:
+				return cellValue < filter.value;
+			case FILTER_OPERATORS.LTE:
+				return cellValue <= filter.value;
+			case FILTER_OPERATORS.GT:
+				return cellValue > filter.value;
+			case FILTER_OPERATORS.GTE:
+				return cellValue >= filter.value;
+			case FILTER_OPERATORS.NE:
+				return cellValue != filter.value;
+			default:
+				return true;
+		}
+	}
 
 	// Berechnung der Seitenanzahl
 	const pageAmount = useMemo(() => {
@@ -279,8 +447,7 @@ function Table<RowType extends Object>({
 	// Das selbe gilt für die angezeigten Reihen pro Seite
 	useEffect(() => {
 		dispatch({
-			type: ACTIONS.PAGE_SET_FIRST,
-			payload: { pageAmount: pageAmount },
+			type: "PAGE_SET_FIRST",
 		});
 	}, [filteredRows, state.rowsPerPage]);
 
@@ -297,7 +464,10 @@ function Table<RowType extends Object>({
 
 	// Es werden alle Reihen ausgewählt, nach denen momentan gefiltert wird
 	function toggleAllRows() {
-		if (selectedRowIds.size >= 0 && selectedRowIds.size < rows.length) {
+		if (
+			selectedRowIds.size >= 0 &&
+			selectedRowIds.size < filteredRows.length
+		) {
 			const newSet = new Set<number>();
 			filteredRows.forEach((row) => newSet.add(row.__rowId));
 			setSelectedRowIds(new Set<number>(newSet));
@@ -308,20 +478,152 @@ function Table<RowType extends Object>({
 
 	const checked = useMemo(() => {
 		if (selectedRowIds.size == 0) return false;
-		else if (selectedRowIds.size == rows.length) return true;
+		else if (selectedRowIds.size == filteredRows.length) return true;
 		else return undefined;
-	}, [selectedRowIds, rows]);
+	}, [selectedRowIds, rows, state.searchQuery, state.filters]);
 
 	return (
 		<div className="min-w-200 max-w-200 text-slate-700">
-			<div className="border border-slate-300 rounded-sm">
+			<div className="border border-slate-300 rounded-sm bg-white overflow-hidden">
 				{/* Grid Header */}
 				<div className="flex items-center justify-between h-12 min-w-fit w-full border-b border-slate-300 px-2">
 					<p className="font-semibold">{props.title}</p>
 
 					{/* Grid Optionen */}
 					<div className="flex gap-x-2 items-center h-full">
-						<IconButton icon="funnel"></IconButton>
+						<Popover
+							trigger={
+								<div className="relative">
+									<IconButton icon="funnel"></IconButton>
+									{state.filters.filters.filter(
+										(filter) => filter.value != "",
+									).length > 0 && (
+										<div className="bg-blue-600 rounded-full size-2 absolute right-0 top-0"></div>
+									)}
+								</div>
+							}
+						>
+							<div className="flex flex-col gap-y-2">
+								{state.filters.filters.map((filter, index) => (
+									<div
+										className="flex gap-x-2 items-center px-2"
+										key={`filter-${index}`}
+									>
+										<IconButton
+											icon="x"
+											onClick={() =>
+												dispatch({
+													type: "FILTER_DELETE",
+													payload: { index: index },
+												})
+											}
+										></IconButton>
+										<Select
+											options={visibleCols.map((col) => ({
+												value: col.field as
+													| string
+													| number,
+												display: col.title,
+											}))}
+											value={String(filter.field)}
+											onChange={(value) =>
+												dispatch({
+													type: "FILTER_CHANGE",
+													payload: {
+														filter: {
+															...filter,
+															field: value as keyof RowType,
+														},
+
+														index: index,
+													},
+												})
+											}
+										></Select>
+										<Select
+											options={Object.values(
+												FILTER_OPERATORS,
+											).map((operator) => ({
+												value: operator,
+												display: operator,
+											}))}
+											value={filter.operator}
+											onChange={(value) =>
+												dispatch({
+													type: "FILTER_CHANGE",
+													payload: {
+														filter: {
+															...filter,
+															operator:
+																value as FilterOperator,
+														},
+														index: index,
+													},
+												})
+											}
+										></Select>
+										<Input
+											value={filter.value}
+											onValueChange={(value) =>
+												dispatch({
+													type: "FILTER_CHANGE",
+													payload: {
+														filter: {
+															...filter,
+															value: value,
+														},
+														index: index,
+													},
+												})
+											}
+										></Input>
+									</div>
+								))}
+
+								<div className="border-t border-slate-300 w-full"></div>
+
+								<div className="px-2 flex items-center gap-x-2 justify-between">
+									<IconButton
+										icon="plus"
+										onClick={() =>
+											dispatch({
+												type: "FILTER_ADD",
+											})
+										}
+									></IconButton>
+									{state.filters.filters.length > 1 && (
+										<Select
+											options={[
+												{
+													value: "and",
+													display: "UND",
+												},
+												{
+													value: "or",
+													display: "ODER",
+												},
+											]}
+											value={state.filters.connection}
+											onChange={() =>
+												dispatch({
+													type: "FILTER_CONNECTION_TOGGLE",
+												})
+											}
+										></Select>
+									)}
+
+									<IconButton
+										icon="trash"
+										onClick={() =>
+											dispatch({
+												type: "FILTERS_RESET",
+											})
+										}
+									></IconButton>
+								</div>
+							</div>
+						</Popover>
+
 						<Popover
 							trigger={
 								<IconButton icon="columns-3-cog"></IconButton>
@@ -345,7 +647,7 @@ function Table<RowType extends Object>({
 											}
 											onChange={() =>
 												dispatch({
-													type: ACTIONS.COL_TOGGLE_VISIBILITY,
+													type: "COL_TOGGLE_VISIBILITY",
 													payload: {
 														field: column.field,
 													},
@@ -362,7 +664,7 @@ function Table<RowType extends Object>({
 							icon="refresh-ccw-dot"
 							onClick={() =>
 								dispatch({
-									type: ACTIONS.STATE_SET,
+									type: "STATE_SET",
 									payload: { state: initialState },
 								})
 							}
@@ -388,8 +690,8 @@ function Table<RowType extends Object>({
 							value={state.rowsPerPage}
 							onChange={(value) =>
 								dispatch({
-									type: ACTIONS.ROWS_PER_PAGE_SET,
-									payload: { rowsPerPage: String(value) },
+									type: "ROWS_PER_PAGE_SET",
+									payload: { rowsPerPage: value as number },
 								})
 							}
 						></Select>
@@ -400,7 +702,7 @@ function Table<RowType extends Object>({
 					Eigentliche Tabelle mit horizontaler Scrollbar, falls Breite überschritten wird.
 					Besteht aus Header, Körper und Footer.
 				*/}
-				<div className="max-w-full overflow-auto grid grid-cols-[1fr] divide-y divide-slate-300">
+				<div className="relative max-w-full overflow-auto grid grid-cols-[1fr] divide-y divide-slate-300">
 					{/* Header-Zeile mit Header pro Spalte */}
 					<div className="flex items-center h-12 min-w-fit w-full">
 						{/* 
@@ -408,7 +710,7 @@ function Table<RowType extends Object>({
 							TODO: Muss noch automatisch generiert werden und Header Komponente nutze
 						*/}
 						<div className="group flex h-full pl-2 w-10">
-							<div className="relative flex gap-x-2 h-full items-center w-full">
+							<div className="flex gap-x-2 h-full items-center w-full">
 								<Checkbox
 									checked={checked}
 									onChange={() => toggleAllRows()}
@@ -526,8 +828,7 @@ function Table<RowType extends Object>({
 						disabled={state.selectedPage <= 0}
 						onClick={() =>
 							dispatch({
-								type: ACTIONS.PAGE_SET_FIRST,
-								payload: { pageAmount: pageAmount },
+								type: "PAGE_SET_FIRST",
 							})
 						}
 					>
@@ -537,8 +838,7 @@ function Table<RowType extends Object>({
 						disabled={state.selectedPage <= 0}
 						onClick={() =>
 							dispatch({
-								type: ACTIONS.PAGE_SET_PREV,
-								payload: { pageAmount: pageAmount },
+								type: "PAGE_SET_PREV",
 							})
 						}
 					>
@@ -557,7 +857,7 @@ function Table<RowType extends Object>({
 						disabled={state.selectedPage >= pageAmount - 1}
 						onClick={() =>
 							dispatch({
-								type: ACTIONS.PAGE_SET_NEXT,
+								type: "PAGE_SET_NEXT",
 								payload: { pageAmount: pageAmount },
 							})
 						}
@@ -568,7 +868,7 @@ function Table<RowType extends Object>({
 						disabled={state.selectedPage >= pageAmount - 1}
 						onClick={() =>
 							dispatch({
-								type: ACTIONS.PAGE_SET_LAST,
+								type: "PAGE_SET_LAST",
 								payload: { pageAmount: pageAmount },
 							})
 						}
