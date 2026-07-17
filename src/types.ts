@@ -1,10 +1,20 @@
+type TypeMap<T> = T extends number
+	? "number"
+	: T extends boolean
+		? "boolean"
+		: T extends Date
+			? "date"
+			: "string";
+
 export type CreateColumnUnion<RowType> = {
-	[P in keyof RowType]: Column<RowType, P>;
+	[P in keyof RowType]: Column<RowType, P> & {
+		dataType: TypeMap<RowType[P]>;
+	};
 }[keyof RowType];
 
 export interface Column<RowType, ColKey extends keyof RowType = keyof RowType> {
 	field: ColKey;
-	type?: any;
+	dataType: "string" | "number" | "boolean" | "date";
 	title: string;
 	render?: (cellValue: RowType[ColKey]) => React.ReactNode;
 	initialWidth?: number;
