@@ -53,7 +53,7 @@ function Table<RowType extends Object>({
 		selectedPage: 0,
 		rowsPerPage: rowsPerPageOptions[0].value,
 		sorting: {
-			field: props.columns[0].field,
+			column: props.columns[0],
 			direction: "asc",
 		},
 		columns: initalColumns,
@@ -94,13 +94,12 @@ function Table<RowType extends Object>({
 				// Wenn neues Feld ausgewählt wird
 				// Da nur ein Richtungs-State für die gesamte Tabelle existiert, wird sobald die Spalte gewechselt wird
 				// der State zurück auf ASC gesetzt
-				if (state.sorting.field != column.field) {
-					state.sorting.field = column.field;
+				if (state.sorting.column.field != column.field) {
 					return {
 						...state,
 						sorting: {
 							...state.sorting,
-							field: column.field,
+							column: column,
 							direction: "asc",
 						},
 					};
@@ -113,7 +112,7 @@ function Table<RowType extends Object>({
 							...state,
 							sorting: {
 								...state.sorting,
-								field: column.field,
+								column: column,
 								direction: "desc",
 							},
 						};
@@ -122,7 +121,7 @@ function Table<RowType extends Object>({
 							...state,
 							sorting: {
 								...state.sorting,
-								field: column.field,
+								column: column,
 								direction: "asc",
 							},
 						};
@@ -416,19 +415,17 @@ function Table<RowType extends Object>({
 
 		switch (filter.column.dataType) {
 			case "string":
+				const stringCellValue = String(cellValue).toUpperCase();
+				const stringFilterValue = String(filter.value).toUpperCase();
 				switch (filter.operator) {
 					case FILTER_OPERATORS[filter.column.dataType].E:
-						return cellValue == filter.value;
+						return stringCellValue == stringFilterValue;
 					case FILTER_OPERATORS[filter.column.dataType].NE:
-						return cellValue != filter.value;
+						return stringCellValue != stringFilterValue;
 					case FILTER_OPERATORS[filter.column.dataType].C:
-						return String(cellValue)
-							.toUpperCase()
-							.includes(String(filter.value).toUpperCase());
+						return stringCellValue.includes(stringFilterValue);
 					case FILTER_OPERATORS[filter.column.dataType].NC:
-						return !String(cellValue)
-							.toUpperCase()
-							.includes(String(filter.value).toUpperCase());
+						return !stringCellValue.includes(stringFilterValue);
 					default:
 						return true;
 				}
@@ -473,19 +470,34 @@ function Table<RowType extends Object>({
 
 	// Sortierung anhand der ausgewählten Spalte und Richtung
 	const sortedRows = useMemo(() => {
-		if (!state.columns.get(state.sorting.field)?.visible)
+		if (!state.columns.get(state.sorting.column.field)?.visible)
 			return [...filteredRows];
 
-		const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
-			const valueA = Number(rowA[state.sorting.field]);
-			const valueB = Number(rowB[state.sorting.field]);
+		switch (state.sorting.column.dataType) {
+			case "number": {
+				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
+					const valueA = Number(rowA[state.sorting.column.field]);
+					const valueB = Number(rowB[state.sorting.column.field]);
 
-			return state.sorting.direction == "asc"
-				? valueA - valueB
-				: valueB - valueA;
-		});
-		return newRows;
-	}, [state.sorting.field, state.sorting.direction, filteredRows]);
+					return state.sorting.direction == "asc"
+						? valueA - valueB
+						: valueB - valueA;
+				});
+				return newRows;
+			}
+			case "string": {
+				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
+					const valueA = String(rowA[state.sorting.column.field]);
+					const valueB = String(rowB[state.sorting.column.field]);
+
+					return state.sorting.direction == "asc"
+						? valueA.localeCompare(valueB)
+						: valueB.localeCompare(valueA);
+				});
+				return newRows;
+			}
+		}
+	}, [state.sorting.column, state.sorting.direction, filteredRows]);
 
 	// Zuschneidung der angezeigten Reihen anhad der momentanen Seite
 	const paginatedRows = useMemo(() => {
@@ -812,20 +824,17 @@ function Table<RowType extends Object>({
 								Checkbox-Header
 								TODO: Muss noch automatisch generiert werden und Header Komponente nutze
 							*/}
-							<div
-								className={`group flex h-full pl-2 ${pinnedCols.length == 0 ? "pr-2" : ""}`}
-							>
+							<div className={`group flex h-full pl-2 w-10`}>
 								<div className="flex gap-x-2 h-full items-center w-full">
 									<Checkbox
 										checked={checked}
 										onChange={() => toggleAllRows()}
 									></Checkbox>
 								</div>
-								{pinnedCols.length > 0 && (
-									<HeaderResizer
-										isResizable={false}
-									></HeaderResizer>
-								)}
+
+								<HeaderResizer
+									isResizable={false}
+								></HeaderResizer>
 							</div>
 
 							{pinnedCols.map((column, headerIndex) => (
@@ -849,7 +858,7 @@ function Table<RowType extends Object>({
 									*/}
 									<div
 										key={`row-${rowIndex}-cell-select`}
-										className={`px-2`}
+										className={`px-2 w-10`}
 									>
 										<Checkbox
 											checked={selectedRowIds.has(

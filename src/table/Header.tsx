@@ -30,18 +30,18 @@ function Header<RowType>({ ...props }: HeaderProps<RowType>) {
 				</span>
 
 				<div
-					className={`flex items-center justify-between gap-x-1 mr-1 ${props.tableState.sorting.field != props.column.field ? "not-group-hover:w-0" : ""}`}
+					className={`flex items-center justify-between gap-x-1 mr-1 ${props.tableState.sorting.column.field != props.column.field ? "not-group-hover:w-0 not-group-hover:pointer-events-none" : ""}`}
 				>
 					{props.column.isSortable && (
 						<IconButton
 							icon={
-								props.tableState.sorting.field ==
+								props.tableState.sorting.column.field ==
 									props.column.field &&
 								props.tableState.sorting.direction == "desc"
 									? "move-down"
 									: "move-up"
 							}
-							className={`${props.tableState.sorting.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
+							className={`${props.tableState.sorting.column.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
 							onClick={() =>
 								props.dispatch({
 									type: "SORT_TOGGLE",

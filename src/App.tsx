@@ -5,13 +5,24 @@ type Article = {
 	id: number;
 	data: number;
 	percent: number;
+	status: string;
 	active: boolean;
 };
+
+const status = [
+	"Ausgeliefert",
+	"Unterwegs",
+	"Lager",
+	"Entladepuffer",
+	"Reparatur",
+	"Unbekannt",
+];
 
 const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 	id: index,
 	data: Number((100 * Math.random()).toFixed(2)),
 	percent: Number((100 * Math.random()).toFixed(2)),
+	status: status[Math.round(Math.random() * 6) - 1],
 	active: index % 3 == 0,
 }));
 
@@ -34,6 +45,12 @@ function App() {
 						dataType: "number",
 						isSortable: true,
 						isPinned: true,
+					},
+					{
+						field: "status",
+						title: "Status",
+						dataType: "string",
+						isSortable: true,
 					},
 					{
 						field: "percent",

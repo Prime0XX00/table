@@ -29,7 +29,7 @@ export type TableRow<RowType> = RowType & {
 };
 
 export interface SortState<RowType> {
-	field: keyof RowType;
+	column: Column<RowType>;
 	direction: "asc" | "desc";
 }
 
