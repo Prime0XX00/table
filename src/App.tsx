@@ -4,14 +4,14 @@ import Table from "./table/Table";
 type Article = {
 	id: number;
 	data: number;
-	percent: string;
+	percent: number;
 	active: boolean;
 };
 
 const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 	id: index,
 	data: Number((100 * Math.random()).toFixed(2)),
-	percent: (100 * Math.random()).toFixed(2),
+	percent: Number((100 * Math.random()).toFixed(2)),
 	active: index % 3 == 0,
 }));
 
@@ -38,9 +38,9 @@ function App() {
 					{
 						field: "percent",
 						title: "Fortschritt",
-						dataType: "string",
+						dataType: "number",
 						isSortable: true,
-						initialWidth: 300,
+						initialWidth: 250,
 						render: (value) => (
 							<div className="relative bg-slate-200 rounded-full h-2 w-full overflow-hidden">
 								<div

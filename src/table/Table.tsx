@@ -62,8 +62,10 @@ function Table<RowType extends Object>({
 		filters: {
 			filters: [
 				{
-					field: props.columns[0].field,
-					operator: "=",
+					column: props.columns[0],
+					operator: Object.values(
+						FILTER_OPERATORS[props.columns[0].dataType],
+					)[0] as FilterOperator,
 					value: "",
 				},
 			],
@@ -202,9 +204,21 @@ function Table<RowType extends Object>({
 			// Die Änderung an einem Filter händeln
 			// Hier kann die betroffene Spalte, der Filteroperand und der Wert angepasst werden
 			case "FILTER_CHANGE":
-				const newFilter = {
-					field: action.payload.filter.field,
-					operator: action.payload.filter.operator,
+				// Guckt ob der übergebene Operator zum Datentyp passt
+				// Falls nicht, wird der erste mögliche Operator des Typs geholt
+				const newOperator = Object.values(
+					FILTER_OPERATORS[action.payload.filter.column.dataType],
+				).includes(action.payload.filter.operator)
+					? action.payload.filter.operator
+					: (Object.values(
+							FILTER_OPERATORS[
+								action.payload.filter.column.dataType
+							],
+						)[0] as FilterOperator);
+
+				const newFilter: Filter<RowType> = {
+					column: action.payload.filter.column,
+					operator: newOperator,
 					value: action.payload.filter.value,
 				};
 
@@ -244,8 +258,12 @@ function Table<RowType extends Object>({
 							...state.filters,
 							filters: [
 								{
-									field: props.columns[0].field,
-									operator: "=",
+									column: props.columns[0],
+									operator: Object.values(
+										FILTER_OPERATORS[
+											props.columns[0].dataType
+										],
+									)[0] as FilterOperator,
 									value: "",
 								},
 							],
@@ -275,8 +293,10 @@ function Table<RowType extends Object>({
 						filters: [
 							...state.filters.filters,
 							{
-								field: props.columns[0].field,
-								operator: "=",
+								column: props.columns[0],
+								operator: Object.values(
+									FILTER_OPERATORS[props.columns[0].dataType],
+								)[0] as FilterOperator,
 								value: "",
 							},
 						],
@@ -291,8 +311,10 @@ function Table<RowType extends Object>({
 						...state.filters,
 						filters: [
 							{
-								field: props.columns[0].field,
-								operator: "=",
+								column: props.columns[0],
+								operator: Object.values(
+									FILTER_OPERATORS[props.columns[0].dataType],
+								)[0] as FilterOperator,
 								value: "",
 							},
 						],
@@ -361,9 +383,10 @@ function Table<RowType extends Object>({
 		});
 
 		// Filterung
-		const filters = state.filters.filters.filter(
-			(filter) => filter.value != "",
-		);
+
+		const filters = state.filters.filters.filter((filter) => {
+			return filter.value !== "";
+		});
 		if (filters.length == 0) return newRows;
 
 		const filteredNewRows = newRows.filter((row) => {
@@ -386,22 +409,53 @@ function Table<RowType extends Object>({
 		row: TableRow<RowType>,
 		filter: Filter<RowType>,
 	): boolean {
-		const cellValue = row[filter.field];
+		const cellValue = row[filter.column.field];
 
-		switch (filter.operator) {
-			case FILTER_OPERATORS.E:
-				return cellValue == filter.value;
-			case FILTER_OPERATORS.LT:
-				return cellValue < filter.value;
-			case FILTER_OPERATORS.LTE:
-				return cellValue <= filter.value;
-			case FILTER_OPERATORS.GT:
-				return cellValue > filter.value;
-			case FILTER_OPERATORS.GTE:
-				return cellValue >= filter.value;
-			case FILTER_OPERATORS.NE:
-				return cellValue != filter.value;
-			default:
+		switch (filter.column.dataType) {
+			case "string":
+				switch (filter.operator) {
+					case FILTER_OPERATORS[filter.column.dataType].E:
+						return cellValue == filter.value;
+					case FILTER_OPERATORS[filter.column.dataType].NE:
+						return cellValue != filter.value;
+					case FILTER_OPERATORS[filter.column.dataType].C:
+						return String(cellValue)
+							.toUpperCase()
+							.includes(String(filter.value).toUpperCase());
+					case FILTER_OPERATORS[filter.column.dataType].NC:
+						return !String(cellValue)
+							.toUpperCase()
+							.includes(String(filter.value).toUpperCase());
+					default:
+						return true;
+				}
+			case "number":
+				switch (filter.operator) {
+					case FILTER_OPERATORS[filter.column.dataType].E:
+						return cellValue == filter.value;
+					case FILTER_OPERATORS[filter.column.dataType].LT:
+						return cellValue < filter.value;
+					case FILTER_OPERATORS[filter.column.dataType].LTE:
+						return cellValue <= filter.value;
+					case FILTER_OPERATORS[filter.column.dataType].GT:
+						return cellValue > filter.value;
+					case FILTER_OPERATORS[filter.column.dataType].GTE:
+						return cellValue >= filter.value;
+					case FILTER_OPERATORS[filter.column.dataType].NE:
+						return cellValue != filter.value;
+					default:
+						return true;
+				}
+			case "boolean":
+				switch (filter.operator) {
+					case FILTER_OPERATORS[filter.column.dataType].E:
+						return filter.value === ""
+							? true
+							: cellValue == filter.value;
+					default:
+						return true;
+				}
+			case "date":
 				return true;
 		}
 	}
@@ -520,20 +574,29 @@ function Table<RowType extends Object>({
 											}
 										></IconButton>
 										<Select
-											options={visibleCols.map((col) => ({
-												value: col.field as
-													| string
-													| number,
-												display: col.title,
-											}))}
-											value={String(filter.field)}
+											options={props.columns.map(
+												(col) => ({
+													value: col.field as
+														| string
+														| number,
+													display: col.title,
+												}),
+											)}
+											value={String(filter.column.field)}
 											onChange={(value) =>
 												dispatch({
 													type: "FILTER_CHANGE",
 													payload: {
 														filter: {
 															...filter,
-															field: value as keyof RowType,
+															column:
+																props.columns.find(
+																	(col) =>
+																		col.field ==
+																		(value as keyof RowType),
+																) ??
+																props
+																	.columns[0],
 														},
 
 														index: index,
@@ -543,7 +606,10 @@ function Table<RowType extends Object>({
 										></Select>
 										<Select
 											options={Object.values(
-												FILTER_OPERATORS,
+												FILTER_OPERATORS[
+													state.filters.filters[index]
+														.column.dataType
+												],
 											).map((operator) => ({
 												value: operator,
 												display: operator,
@@ -563,21 +629,53 @@ function Table<RowType extends Object>({
 												})
 											}
 										></Select>
-										<Input
-											value={filter.value}
-											onValueChange={(value) =>
-												dispatch({
-													type: "FILTER_CHANGE",
-													payload: {
-														filter: {
-															...filter,
-															value: value,
-														},
-														index: index,
+										{filter.column.dataType == "boolean" ? (
+											<Select
+												options={[
+													{
+														value: "",
+														display: "-----",
 													},
-												})
-											}
-										></Input>
+													{
+														value: "1",
+														display: "WAHR",
+													},
+													{
+														value: "0",
+														display: "FALSCH",
+													},
+												]}
+												value={filter.value}
+												onChange={(value) =>
+													dispatch({
+														type: "FILTER_CHANGE",
+														payload: {
+															filter: {
+																...filter,
+																value: value,
+															},
+															index: index,
+														},
+													})
+												}
+											></Select>
+										) : (
+											<Input
+												value={filter.value}
+												onValueChange={(value) =>
+													dispatch({
+														type: "FILTER_CHANGE",
+														payload: {
+															filter: {
+																...filter,
+																value: value,
+															},
+															index: index,
+														},
+													})
+												}
+											></Input>
+										)}
 									</div>
 								))}
 

@@ -47,26 +47,43 @@ export interface FilterState<RowType> {
 	connection: "or" | "and";
 }
 
-export interface Filter<RowType, ColKey extends keyof RowType = keyof RowType> {
-	field: ColKey;
+export interface Filter<RowType> {
+	column: Column<RowType>;
 	operator: FilterOperator;
 	value: string | number;
 }
 
-export type FilterOperator = "=" | "!=" | "<" | ">" | "<=" | ">=";
+export type FilterOperator =
+	| "="
+	| "!="
+	| "<"
+	| ">"
+	| "<="
+	| ">="
+	| "Gleich"
+	| "Ungleich"
+	| "Enthält"
+	| "Enthält nicht";
 
 export const FILTER_OPERATORS = {
-	E: "=",
-	NE: "!=",
-	LT: "<",
-	LTE: "<=",
-	GT: ">",
-	GTE: ">=",
-};
-
-export const STRING_FILTER_OPERATORS = {
-	EQUAL: "Gleich",
-	CONTAINS: "Enthält",
+	number: {
+		E: "=",
+		NE: "!=",
+		LT: "<",
+		LTE: "<=",
+		GT: ">",
+		GTE: ">=",
+	},
+	boolean: {
+		E: "Gleich",
+	},
+	string: {
+		E: "Gleich",
+		NE: "Ungleich",
+		C: "Enthält",
+		NC: "Enthält nicht",
+	},
+	date: {},
 };
 
 export interface ColumnState {

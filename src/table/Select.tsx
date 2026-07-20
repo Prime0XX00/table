@@ -16,13 +16,13 @@ interface Option {
 const Select: React.FC<SelectProps> = ({ ...props }) => {
 	useEffect(() => {
 		setSelectedOption(
-			props.options.find((option) => option.value == props.value) ??
+			props.options.find((option) => option.value === props.value) ??
 				props.options[0],
 		);
 	}, [props.value, props.options]);
 
 	const [selectedOption, setSelectedOption] = useState<Option>(
-		props.options.find((option) => option.value == props.value) ??
+		props.options.find((option) => option.value === props.value) ??
 			props.options[0],
 	);
 
