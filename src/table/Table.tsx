@@ -8,7 +8,6 @@ import { useEffect, useMemo, useReducer, useState } from "react";
 import HeaderResizer from "./HeaderResizer";
 import {
 	FILTER_OPERATORS,
-	type Column,
 	type ColumnState,
 	type CreateColumnUnion,
 	type Filter,
@@ -194,6 +193,21 @@ function Table<RowType extends Object>({
 				};
 			}
 
+			case "COL_TOGGLE_PIN": {
+				const colState = state.columns.get(action.payload.field);
+				if (!colState) return state;
+
+				return {
+					...state,
+					columns: new Map(
+						state.columns.set(action.payload.field, {
+							...colState,
+							pinned: !colState.pinned,
+						}),
+					),
+				};
+			}
+
 			// Suchkeywort verwalten
 			case "SEARCH_QUERY_SET":
 				return {
@@ -324,25 +338,6 @@ function Table<RowType extends Object>({
 	}
 
 	// Demo
-	function setWidth(field: keyof RowType, width: number) {
-		dispatch({
-			type: "COL_SET_WIDTH",
-			payload: {
-				field: field,
-				width: width,
-			},
-		});
-	}
-
-	// Demo
-	function toggleSort(column: Column<RowType>) {
-		dispatch({
-			type: "SORT_TOGGLE",
-			payload: { column: column },
-		});
-	}
-
-	// Demo
 	function changeSearchQuery(newSearchQuery: string) {
 		dispatch({
 			type: "SEARCH_QUERY_SET",
@@ -355,6 +350,15 @@ function Table<RowType extends Object>({
 			[...props.columns].filter(
 				(col) => state.columns.get(col.field)?.visible,
 			),
+		[props.columns, state.columns],
+	);
+
+	const pinnedCols = useMemo(
+		() =>
+			[...props.columns].filter(
+				(col) => state.columns.get(col.field)?.pinned,
+			),
+
 		[props.columns, state.columns],
 	);
 
@@ -383,7 +387,6 @@ function Table<RowType extends Object>({
 		});
 
 		// Filterung
-
 		const filters = state.filters.filters.filter((filter) => {
 			return filter.value !== "";
 		});
@@ -801,95 +804,172 @@ function Table<RowType extends Object>({
 					Eigentliche Tabelle mit horizontaler Scrollbar, falls Breite überschritten wird.
 					Besteht aus Header, Körper und Footer.
 				*/}
-				<div className="relative max-w-full overflow-auto grid grid-cols-[1fr] divide-y divide-slate-300">
-					{/* Header-Zeile mit Header pro Spalte */}
-					<div className="flex items-center h-12 min-w-fit w-full">
-						{/* 
-							Checkbox-Header
-							TODO: Muss noch automatisch generiert werden und Header Komponente nutze
-						*/}
-						<div className="group flex h-full pl-2 w-10">
-							<div className="flex gap-x-2 h-full items-center w-full">
-								<Checkbox
-									checked={checked}
-									onChange={() => toggleAllRows()}
-								></Checkbox>
-							</div>
-							<HeaderResizer isResizable={false}></HeaderResizer>
-						</div>
-
-						{/* 
-							Restlichen Header
-						*/}
-						{visibleCols.map((column, headerIndex) => (
-							<Header
-								key={`header-${headerIndex}`}
-								tableState={state}
-								column={column}
-								setWidth={setWidth}
-								toggleSort={toggleSort}
-							></Header>
-						))}
-					</div>
-
-					{/* Body-Zeilen */}
-					<div className="min-w-fit w-full">
-						{paginatedRows?.map((row, rowIndex) => (
+				<div className="relative max-w-full overflow-auto flex">
+					{/* Pinned */}
+					<div className="sticky left-0 top-0 h-full bg-white grid grid-cols-[1fr] divide-y divide-slate-300 z-1 border-r border-slate-300">
+						<div className="flex items-center h-12 w-fit">
+							{/* 
+								Checkbox-Header
+								TODO: Muss noch automatisch generiert werden und Header Komponente nutze
+							*/}
 							<div
-								key={`row-${rowIndex}`}
-								className={`${selectedRowIds.has(row.__rowId) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} w-full h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
+								className={`group flex h-full pl-2 ${pinnedCols.length == 0 ? "pr-2" : ""}`}
 							>
-								{/* 
-									Checkbox-Zelle
-									TODO: Muss noch automatisch generiert werden und Zellen Komponente nutzen
-								*/}
-								<div
-									key={`row-${rowIndex}-cell-select`}
-									className="px-2 w-10"
-								>
+								<div className="flex gap-x-2 h-full items-center w-full">
 									<Checkbox
-										checked={selectedRowIds.has(
-											row.__rowId,
-										)}
-										onChange={() => toggleRow(row)}
+										checked={checked}
+										onChange={() => toggleAllRows()}
 									></Checkbox>
 								</div>
-
-								{/* Restliche Zellen */}
-								{visibleCols.map((column, cellIndex) => (
-									<div
-										key={`row-${rowIndex}-cell-${cellIndex}`}
-										className="px-2 overflow-hidden text-ellipsis min-w-28"
-										style={{
-											width:
-												state.columns.get(column.field)
-													?.width + "px",
-										}}
-									>
-										{column.render
-											? column.render(row[column.field])
-											: String(row[column.field])}
-									</div>
-								))}
+								{pinnedCols.length > 0 && (
+									<HeaderResizer
+										isResizable={false}
+									></HeaderResizer>
+								)}
 							</div>
-						))}
-						{/* 
+
+							{pinnedCols.map((column, headerIndex) => (
+								<Header
+									key={`header-pinned-${headerIndex}`}
+									tableState={state}
+									column={column}
+									dispatch={dispatch}
+								></Header>
+							))}
+						</div>
+						<div>
+							{paginatedRows?.map((row, rowIndex) => (
+								<div
+									key={`row-pinned-${rowIndex}`}
+									className={`${selectedRowIds.has(row.__rowId) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} w-full h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
+								>
+									{/* 
+										Checkbox-Zelle
+										TODO: Muss noch automatisch generiert werden und Zellen Komponente nutzen
+									*/}
+									<div
+										key={`row-${rowIndex}-cell-select`}
+										className={`px-2`}
+									>
+										<Checkbox
+											checked={selectedRowIds.has(
+												row.__rowId,
+											)}
+											onChange={() => toggleRow(row)}
+										></Checkbox>
+									</div>
+									{/* Restliche Zellen */}
+									{pinnedCols.map((column, cellIndex) => (
+										<div
+											key={`row-${rowIndex}-cell-${cellIndex}`}
+											className="px-2 overflow-hidden text-ellipsis min-w-28"
+											style={{
+												width:
+													state.columns.get(
+														column.field,
+													)?.width + "px",
+											}}
+										>
+											{column.render
+												? column.render(
+														row[column.field],
+													)
+												: String(row[column.field])}
+										</div>
+									))}
+								</div>
+							))}
+							{paginatedRows.length < state.rowsPerPage &&
+								Array.from({
+									length:
+										state.rowsPerPage -
+										paginatedRows.length,
+								}).map((_, rowIndex) => (
+									<div
+										key={`row-empty-${rowIndex}`}
+										className={`h-8.5`}
+									></div>
+								))}
+						</div>
+						<div className="h-12 flex items-center justify-between px-2 min-w-fit w-full"></div>
+					</div>
+
+					<div className="grid grid-cols-[1fr] divide-y divide-slate-300 w-full">
+						{/* Header-Zeile mit Header pro Spalte */}
+						<div className="flex items-center h-12 min-w-fit w-full">
+							{/* 
+								Restlichen Header, die nicht gepinnt sind
+							*/}
+							{visibleCols
+								.filter(
+									(visibleCol) =>
+										!state.columns.get(visibleCol.field)
+											?.pinned,
+								)
+								.map((column, headerIndex) => (
+									<Header
+										key={`header-${headerIndex}`}
+										tableState={state}
+										column={column}
+										dispatch={dispatch}
+									></Header>
+								))}
+						</div>
+
+						{/* Body-Zeilen */}
+						<div className="min-w-fit w-full">
+							{paginatedRows?.map((row, rowIndex) => (
+								<div
+									key={`row-${rowIndex}`}
+									className={`${selectedRowIds.has(row.__rowId) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} w-full h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
+								>
+									{/* Restliche Zellen */}
+									{visibleCols
+										.filter(
+											(visibleCol) =>
+												!state.columns.get(
+													visibleCol.field,
+												)?.pinned,
+										)
+										.map((column, cellIndex) => (
+											<div
+												key={`row-${rowIndex}-cell-${cellIndex}`}
+												className="px-2 overflow-hidden text-ellipsis min-w-28"
+												style={{
+													width:
+														state.columns.get(
+															column.field,
+														)?.width + "px",
+												}}
+											>
+												{column.render
+													? column.render(
+															row[column.field],
+														)
+													: String(row[column.field])}
+											</div>
+										))}
+								</div>
+							))}
+							{/* 
 							Leere Zeilen, damit die Tabellenhöhe immer gleich bleibt.
 							Generiert diese, bis die Anzahl an Reihen pro Seite eingehalten wird.
 						*/}
-						{paginatedRows.length < state.rowsPerPage &&
-							Array.from({
-								length:
-									state.rowsPerPage - paginatedRows.length,
-							}).map((_, rowIndex) => (
-								<div
-									key={`row-empty-${rowIndex}`}
-									className={`h-8.5`}
-								></div>
-							))}
+							{paginatedRows.length < state.rowsPerPage &&
+								Array.from({
+									length:
+										state.rowsPerPage -
+										paginatedRows.length,
+								}).map((_, rowIndex) => (
+									<div
+										key={`row-empty-${rowIndex}`}
+										className={`h-8.5`}
+									></div>
+								))}
+						</div>
+						{/* Footer */}
+						<div className="h-12 flex items-center justify-between px-2 min-w-fit w-full"></div>
 					</div>
-					{/* Footer */}
-					<div className="h-12 flex items-center justify-between px-2 min-w-fit w-full"></div>
 				</div>
 			</div>
 

@@ -41,7 +41,7 @@ const HeaderResizer: React.FC<ResizerProps> = ({
 			window.removeEventListener("mouseup", onMouseUp);
 			window.removeEventListener("mousemove", onMouseMove);
 		};
-	}, [props.container]);
+	}, [props.container, props.callback]);
 
 	function handleMove(x: number) {
 		if (!resizerRef.current || !props.container) return;

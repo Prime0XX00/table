@@ -1,4 +1,4 @@
-import type { Column, TableState } from "../types";
+import type { Column, TableAction, TableState } from "../types";
 import HeaderResizer from "./HeaderResizer";
 import { useState } from "react";
 import IconButton from "./IconButton";
@@ -6,8 +6,7 @@ import IconButton from "./IconButton";
 interface HeaderProps<RowType> {
 	tableState: TableState<RowType>;
 	column: Column<RowType, keyof RowType>;
-	setWidth: (field: keyof RowType, width: number) => void;
-	toggleSort: (column: Column<RowType, keyof RowType>) => void;
+	dispatch: (action: TableAction<RowType>) => void;
 }
 
 function Header<RowType>({ ...props }: HeaderProps<RowType>) {
@@ -43,11 +42,22 @@ function Header<RowType>({ ...props }: HeaderProps<RowType>) {
 									: "move-up"
 							}
 							className={`${props.tableState.sorting.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
-							onClick={() => props.toggleSort(props.column)}
+							onClick={() =>
+								props.dispatch({
+									type: "SORT_TOGGLE",
+									payload: { column: props.column },
+								})
+							}
 						></IconButton>
 					)}
 
 					<IconButton
+						onClick={() =>
+							props.dispatch({
+								type: "COL_TOGGLE_PIN",
+								payload: { field: props.column.field },
+							})
+						}
 						icon="ellipsis-vertical"
 						className="group-hover:opacity-100 opacity-0"
 					></IconButton>
@@ -56,7 +66,15 @@ function Header<RowType>({ ...props }: HeaderProps<RowType>) {
 			<HeaderResizer
 				isResizable={props.column.isResizable}
 				container={headerElement}
-				callback={(width) => props.setWidth(props.column.field, width)}
+				callback={(width) =>
+					props.dispatch({
+						type: "COL_SET_WIDTH",
+						payload: {
+							field: props.column.field,
+							width: width,
+						},
+					})
+				}
 			></HeaderResizer>
 		</div>
 	);

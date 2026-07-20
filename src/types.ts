@@ -105,6 +105,7 @@ export type TableAction<RowType> =
 			payload: { field: keyof RowType; width: number };
 	  }
 	| { type: "COL_TOGGLE_VISIBILITY"; payload: { field: keyof RowType } }
+	| { type: "COL_TOGGLE_PIN"; payload: { field: keyof RowType } }
 	| { type: "SEARCH_QUERY_SET"; payload: { searchQuery: string } }
 	| {
 			type: "FILTER_CHANGE";
