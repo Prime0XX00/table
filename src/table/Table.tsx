@@ -44,7 +44,7 @@ function Table<RowType extends Object>({
 		initalColumns.set(column.field, {
 			width: column.initialWidth ?? 160,
 			visible: column.isVisible ?? true,
-			pinned: false,
+			pinned: column.isPinned ?? false,
 		});
 	});
 
@@ -347,7 +347,9 @@ function Table<RowType extends Object>({
 	const visibleCols = useMemo(
 		() =>
 			[...props.columns].filter(
-				(col) => state.columns.get(col.field)?.visible,
+				(col) =>
+					state.columns.get(col.field)?.visible &&
+					!state.columns.get(col.field)?.pinned,
 			),
 		[props.columns, state.columns],
 	);
@@ -355,7 +357,9 @@ function Table<RowType extends Object>({
 	const pinnedCols = useMemo(
 		() =>
 			[...props.columns].filter(
-				(col) => state.columns.get(col.field)?.pinned,
+				(col) =>
+					state.columns.get(col.field)?.pinned &&
+					state.columns.get(col.field)?.visible,
 			),
 
 		[props.columns, state.columns],
@@ -909,20 +913,14 @@ function Table<RowType extends Object>({
 							{/* 
 								Restlichen Header, die nicht gepinnt sind
 							*/}
-							{visibleCols
-								.filter(
-									(visibleCol) =>
-										!state.columns.get(visibleCol.field)
-											?.pinned,
-								)
-								.map((column, headerIndex) => (
-									<Header
-										key={`header-${headerIndex}`}
-										tableState={state}
-										column={column}
-										dispatch={dispatch}
-									></Header>
-								))}
+							{visibleCols.map((column, headerIndex) => (
+								<Header
+									key={`header-${headerIndex}`}
+									tableState={state}
+									column={column}
+									dispatch={dispatch}
+								></Header>
+							))}
 						</div>
 
 						{/* Body-Zeilen */}
@@ -933,31 +931,24 @@ function Table<RowType extends Object>({
 									className={`${selectedRowIds.has(row.__rowId) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} w-full h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
 								>
 									{/* Restliche Zellen */}
-									{visibleCols
-										.filter(
-											(visibleCol) =>
-												!state.columns.get(
-													visibleCol.field,
-												)?.pinned,
-										)
-										.map((column, cellIndex) => (
-											<div
-												key={`row-${rowIndex}-cell-${cellIndex}`}
-												className="px-2 overflow-hidden text-ellipsis min-w-28"
-												style={{
-													width:
-														state.columns.get(
-															column.field,
-														)?.width + "px",
-												}}
-											>
-												{column.render
-													? column.render(
-															row[column.field],
-														)
-													: String(row[column.field])}
-											</div>
-										))}
+									{visibleCols.map((column, cellIndex) => (
+										<div
+											key={`row-${rowIndex}-cell-${cellIndex}`}
+											className="px-2 overflow-hidden text-ellipsis min-w-28"
+											style={{
+												width:
+													state.columns.get(
+														column.field,
+													)?.width + "px",
+											}}
+										>
+											{column.render
+												? column.render(
+														row[column.field],
+													)
+												: String(row[column.field])}
+										</div>
+									))}
 								</div>
 							))}
 							{/* 
