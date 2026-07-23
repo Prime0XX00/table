@@ -4,8 +4,8 @@ import { useState } from "react";
 import IconButton from "./IconButton";
 
 interface HeaderProps<RowType> {
-	tableState: TableState<RowType>;
 	column: Column<RowType, keyof RowType>;
+	tableState: TableState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }
 

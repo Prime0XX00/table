@@ -25,6 +25,8 @@ import IconButton from "./IconButton";
 import Select from "./Select";
 import Popover from "./Popover";
 import Input from "./Input";
+import EmptyRow from "./EmptyRow";
+import Cell from "./Cell";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -844,8 +846,8 @@ function Table<RowType extends Object>({
 							{pinnedCols.map((column, headerIndex) => (
 								<Header
 									key={`header-pinned-${headerIndex}`}
-									tableState={state}
 									column={column}
+									tableState={state}
 									dispatch={dispatch}
 								></Header>
 							))}
@@ -873,22 +875,12 @@ function Table<RowType extends Object>({
 									</div>
 									{/* Restliche Zellen */}
 									{pinnedCols.map((column, cellIndex) => (
-										<div
+										<Cell
 											key={`row-${rowIndex}-cell-${cellIndex}`}
-											className="px-2 overflow-hidden text-ellipsis min-w-28"
-											style={{
-												width:
-													state.columns.get(
-														column.field,
-													)?.width + "px",
-											}}
-										>
-											{column.render
-												? column.render(
-														row[column.field],
-													)
-												: String(row[column.field])}
-										</div>
+											column={column}
+											row={row}
+											tableState={state}
+										></Cell>
 									))}
 								</div>
 							))}
@@ -898,10 +890,9 @@ function Table<RowType extends Object>({
 										state.rowsPerPage -
 										paginatedRows.length,
 								}).map((_, rowIndex) => (
-									<div
+									<EmptyRow
 										key={`row-empty-${rowIndex}`}
-										className={`h-8.5`}
-									></div>
+									></EmptyRow>
 								))}
 						</div>
 						<div className="h-12 flex items-center justify-between px-2 min-w-fit w-full"></div>
@@ -932,22 +923,12 @@ function Table<RowType extends Object>({
 								>
 									{/* Restliche Zellen */}
 									{visibleCols.map((column, cellIndex) => (
-										<div
+										<Cell
 											key={`row-${rowIndex}-cell-${cellIndex}`}
-											className="px-2 overflow-hidden text-ellipsis min-w-28"
-											style={{
-												width:
-													state.columns.get(
-														column.field,
-													)?.width + "px",
-											}}
-										>
-											{column.render
-												? column.render(
-														row[column.field],
-													)
-												: String(row[column.field])}
-										</div>
+											column={column}
+											row={row}
+											tableState={state}
+										></Cell>
 									))}
 								</div>
 							))}
@@ -961,10 +942,9 @@ function Table<RowType extends Object>({
 										state.rowsPerPage -
 										paginatedRows.length,
 								}).map((_, rowIndex) => (
-									<div
+									<EmptyRow
 										key={`row-empty-${rowIndex}`}
-										className={`h-8.5`}
-									></div>
+									></EmptyRow>
 								))}
 						</div>
 						{/* Footer */}
