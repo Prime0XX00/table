@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, type InputHTMLAttributes } from "react";
 
-interface InputProps {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 	value?: string | number;
 	onValueChange?: (value: string | number) => void;
 }
