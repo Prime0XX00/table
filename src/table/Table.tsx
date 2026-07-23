@@ -595,8 +595,8 @@ function Table<RowType extends Object>({
 						<DividerX></DividerX>
 
 						<TableSearchField
-							searchQuery={state.searchQuery}
-							onSearchQueryChange={changeSearchQuery}
+							tableState={state}
+							dispatch={dispatch}
 						></TableSearchField>
 
 						<DividerX></DividerX>

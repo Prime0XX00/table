@@ -1,13 +1,16 @@
 import { SearchIcon, XCircleIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import IconButton from "./IconButton";
+import type { TableAction, TableState } from "../types";
 
-interface TableSearchFieldProps {
-	searchQuery: string;
-	onSearchQueryChange: (newSearchQuery: string) => void;
+interface TableSearchFieldProps<RowType> {
+	tableState: TableState<RowType>;
+	dispatch: (action: TableAction<RowType>) => void;
 }
 
-const TableSearchField: React.FC<TableSearchFieldProps> = ({ ...props }) => {
+function TableSearchField<RowType>({
+	...props
+}: TableSearchFieldProps<RowType>) {
 	const [expanded, setExpanded] = useState<boolean>(false);
 
 	const searchFieldRef = useRef<HTMLDivElement>(null);
@@ -16,7 +19,7 @@ const TableSearchField: React.FC<TableSearchFieldProps> = ({ ...props }) => {
 		const handleClickOutside = (e: any) => {
 			if (!searchFieldRef.current) return;
 			if (!expanded) return;
-			if (props.searchQuery) return;
+			if (props.tableState.searchQuery) return;
 
 			const isOutside = !searchFieldRef.current.contains(e.target);
 
@@ -30,7 +33,7 @@ const TableSearchField: React.FC<TableSearchFieldProps> = ({ ...props }) => {
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [searchFieldRef, expanded, props.searchQuery]);
+	}, [searchFieldRef, expanded, props.tableState.searchQuery]);
 
 	return (
 		<div className="relative flex items-center">
@@ -52,13 +55,23 @@ const TableSearchField: React.FC<TableSearchFieldProps> = ({ ...props }) => {
 					name="searchQuery"
 					placeholder="Suchen..."
 					className="focus:outline-none w-full"
-					value={props.searchQuery}
-					onChange={(e) => props.onSearchQueryChange(e.target.value)}
+					value={props.tableState.searchQuery}
+					onChange={(e) =>
+						props.dispatch({
+							type: "SEARCH_QUERY_SET",
+							payload: { searchQuery: e.target.value },
+						})
+					}
 				></input>
-				{props.searchQuery && (
+				{props.tableState.searchQuery && (
 					<div
 						className="p-1 rounded-full hover:bg-slate-100 cursor-pointer"
-						onClick={() => props.onSearchQueryChange("")}
+						onClick={() =>
+							props.dispatch({
+								type: "SEARCH_QUERY_SET",
+								payload: { searchQuery: "" },
+							})
+						}
 					>
 						<XCircleIcon
 							size={18}
@@ -69,6 +82,6 @@ const TableSearchField: React.FC<TableSearchFieldProps> = ({ ...props }) => {
 			</div>
 		</div>
 	);
-};
+}
 
 export default TableSearchField;
