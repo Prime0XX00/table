@@ -623,7 +623,7 @@ function Table<RowType extends Object>({
 				*/}
 				<div className="relative max-w-full overflow-auto flex">
 					{/* Gepinnte Spalten */}
-					<div className="sticky left-0 top-0 z-1 h-full bg-white border-r border-slate-300">
+					<div className="sticky left-0 top-0 z-1 flex bg-white border-r border-slate-300">
 						{pinnedCols.map((column, index) => (
 							<Column
 								key={`column-${index}`}
