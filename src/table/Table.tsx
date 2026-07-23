@@ -11,7 +11,7 @@ import {
 	type TableRow,
 	type TableState,
 } from "../types";
-import Header from "./Header";
+import Header from "./HeaderCell";
 import TableSearchField from "./TableSearchField";
 import Checkbox from "./Checkbox";
 import IconButton from "./IconButton";
@@ -626,7 +626,7 @@ function Table<RowType extends Object>({
 					<div className="sticky left-0 top-0 z-1 flex bg-white border-r border-slate-300">
 						{pinnedCols.map((column, index) => (
 							<Column
-								key={`column-${index}`}
+								key={`column-${index}-pinned`}
 								column={column}
 								selectedRowIds={selectedRowIds}
 								paginatedRows={paginatedRows}
@@ -640,7 +640,7 @@ function Table<RowType extends Object>({
 					<div className="flex w-full">
 						{visibleCols.map((column, index) => (
 							<Column
-								key={`column-${index}`}
+								key={`column-${index}-visible`}
 								column={column}
 								selectedRowIds={selectedRowIds}
 								paginatedRows={paginatedRows}

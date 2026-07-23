@@ -3,13 +3,13 @@ import HeaderResizer from "./HeaderResizer";
 import { useState } from "react";
 import IconButton from "./IconButton";
 
-interface HeaderProps<RowType> {
+interface HeaderCellProps<RowType> {
 	column: Column<RowType, keyof RowType>;
 	tableState: TableState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }
 
-function Header<RowType>({ ...props }: HeaderProps<RowType>) {
+function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 	const [headerElement, setHeaderElement] = useState<HTMLDivElement | null>(
 		null,
 	);
@@ -80,4 +80,4 @@ function Header<RowType>({ ...props }: HeaderProps<RowType>) {
 	);
 }
 
-export default Header;
+export default HeaderCell;

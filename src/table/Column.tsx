@@ -6,7 +6,7 @@ import type {
 } from "../types";
 import Cell from "./Cell";
 import EmptyRow from "./EmptyRow";
-import Header from "./Header";
+import HeaderCell from "./HeaderCell";
 
 interface ColumnProps<RowType> {
 	column: CreateColumnUnion<RowType>;
@@ -18,23 +18,23 @@ interface ColumnProps<RowType> {
 
 function Column<RowType>({ ...props }: ColumnProps<RowType>) {
 	return (
-		<div className="flex flex-col w-fit ">
+		<div className="flex flex-col w-fit">
 			{/* Header-Zelle */}
 			<div className="h-12 border-b border-slate-300">
-				<Header
+				<HeaderCell
 					tableState={props.tableState}
 					column={props.column}
 					dispatch={props.dispatch}
-				></Header>
+				></HeaderCell>
 			</div>
-			{/* Body Zellen */}
 
+			{/* Body Zellen */}
 			{props.paginatedRows.map((row, rowIndex) => (
 				<div
+					key={`row-${rowIndex}-cell`}
 					className={`${props.selectedRowIds.has(row.__rowId) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
 				>
 					<Cell
-						key={`row-${rowIndex}-cell`}
 						column={props.column}
 						row={row}
 						tableState={props.tableState}
@@ -54,6 +54,7 @@ function Column<RowType>({ ...props }: ColumnProps<RowType>) {
 					<EmptyRow key={`row-empty-${rowIndex}`}></EmptyRow>
 				))}
 
+			{/* Footer Zelle */}
 			<div
 				className="h-12 flex items-center justify-between px-2"
 				style={{
