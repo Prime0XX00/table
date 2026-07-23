@@ -22,6 +22,7 @@ export interface Column<RowType, ColKey extends keyof RowType = keyof RowType> {
 	isResizable?: boolean;
 	isVisible?: boolean;
 	isPinned?: boolean;
+	hasOptions?: boolean;
 }
 
 export type TableRow<RowType> = RowType & {
@@ -33,11 +34,14 @@ export interface SortState<RowType> {
 	direction: "asc" | "desc";
 }
 
-export interface TableState<RowType> {
+export interface TableState<
+	RowType,
+	ColKey extends keyof RowType = keyof RowType,
+> {
 	selectedPage: number;
 	rowsPerPage: number;
 	sorting: SortState<RowType>;
-	columns: Map<keyof RowType, ColumnState>;
+	columns: Map<ColKey, ColumnState>;
 	searchQuery: string;
 	filters: FilterState<RowType>;
 }
@@ -92,7 +96,10 @@ export interface ColumnState {
 	pinned: boolean;
 }
 
-export type TableAction<RowType> =
+export type TableAction<
+	RowType,
+	ColKey extends keyof RowType = keyof RowType,
+> =
 	| { type: "STATE_SET"; payload: { state: TableState<RowType> } }
 	| { type: "SORT_TOGGLE"; payload: { column: Column<RowType> } }
 	| { type: "PAGE_SET_FIRST" }
@@ -102,10 +109,10 @@ export type TableAction<RowType> =
 	| { type: "ROWS_PER_PAGE_SET"; payload: { rowsPerPage: number } }
 	| {
 			type: "COL_SET_WIDTH";
-			payload: { field: keyof RowType; width: number };
+			payload: { field: ColKey; width: number };
 	  }
-	| { type: "COL_TOGGLE_VISIBILITY"; payload: { field: keyof RowType } }
-	| { type: "COL_TOGGLE_PIN"; payload: { field: keyof RowType } }
+	| { type: "COL_TOGGLE_VISIBILITY"; payload: { field: ColKey } }
+	| { type: "COL_TOGGLE_PIN"; payload: { field: ColKey } }
 	| { type: "SEARCH_QUERY_SET"; payload: { searchQuery: string } }
 	| {
 			type: "FILTER_CHANGE";

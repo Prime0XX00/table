@@ -37,26 +37,22 @@ function App() {
 						field: "id",
 						title: "ID",
 						dataType: "number",
-						isSortable: true,
 						isPinned: true,
 					},
 					{
 						field: "data",
 						title: "Daten",
 						dataType: "number",
-						isSortable: true,
 					},
 					{
 						field: "status",
 						title: "Status",
 						dataType: "string",
-						isSortable: true,
 					},
 					{
 						field: "percent",
 						title: "Fortschritt",
 						dataType: "number",
-						isSortable: true,
 						initialWidth: 250,
 						render: (value) => (
 							<div className="relative bg-slate-200 rounded-full h-2 w-full overflow-hidden">

@@ -1,10 +1,10 @@
 import Popover from "../Popover";
 import IconButton from "../IconButton";
 import Checkbox from "../Checkbox";
-import type { CreateColumnUnion, TableAction, TableState } from "../../types";
+import type { Column, TableAction, TableState } from "../../types";
 
 interface ColumnsSettingsPopoverProps<RowType> {
-	columns: CreateColumnUnion<RowType>[];
+	columns: Column<RowType>[];
 	tableState: TableState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }

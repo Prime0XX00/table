@@ -1,7 +1,7 @@
 import IconButton from "../IconButton";
 import {
 	FILTER_OPERATORS,
-	type CreateColumnUnion,
+	type Column,
 	type FilterOperator,
 	type TableAction,
 	type TableState,
@@ -11,7 +11,7 @@ import Select from "../Select";
 import Input from "../Input";
 
 interface FilterPopoverProps<RowType> {
-	columns: CreateColumnUnion<RowType>[];
+	columns: Column<RowType>[];
 	tableState: TableState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }

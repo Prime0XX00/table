@@ -1,36 +1,29 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
-import HeaderResizer from "./HeaderResizer";
 import {
 	FILTER_OPERATORS,
 	type ColumnState,
-	type CreateColumnUnion,
 	type Filter,
 	type FilterOperator,
 	type RowsPerPageOption,
 	type TableAction,
 	type TableRow,
 	type TableState,
+	type Column,
 } from "../types";
-import Header from "./HeaderCell";
 import TableSearchField from "./TableSearchField";
-import Checkbox from "./Checkbox";
 import IconButton from "./IconButton";
 import Select from "./Select";
-import Popover from "./Popover";
-import Input from "./Input";
-import EmptyRow from "./EmptyRow";
-import Cell from "./Cell";
 import Pagination from "./Pagination";
 import InfoBar from "./InfoBar";
-import Column from "./Column";
 import FilterPopover from "./popovers/FilterPopover";
 import ColumnsSettingsPopover from "./popovers/ColumnsSettingsPopover";
 import DividerX from "./DividerX";
+import TableColumn from "./TableColumn";
 
 interface TableProps<RowType extends Object> {
 	title: string;
 	rows: Array<RowType> | undefined;
-	columns: CreateColumnUnion<RowType>[];
+	columns: Column<RowType>[];
 	rowsPerPageOptions?: RowsPerPageOption[];
 }
 
@@ -38,11 +31,27 @@ function Table<RowType extends Object>({
 	rowsPerPageOptions = [{ value: 10 }, { value: 20 }, { value: 50 }],
 	...props
 }: TableProps<RowType>) {
-	// Startwerte für Cols
-	const initalColumns = new Map<keyof RowType, ColumnState>();
+	const columns = useMemo(() => {
+		return [
+			...props.columns.map((column) => {
+				const col: Column<RowType> = {
+					hasOptions: column.hasOptions ?? true,
+					isVisible: column.isVisible ?? true,
+					isPinned: column.isPinned ?? false,
+					isSortable: column.isSortable ?? true,
+					initialWidth: column.initialWidth ?? 160,
+					...column,
+				};
+				return col;
+			}),
+		];
+	}, [props.columns]);
 
-	props.columns.forEach((column) => {
-		initalColumns.set(column.field, {
+	// Startwerte für Cols
+	const initalColumnStates = new Map<keyof RowType, ColumnState>();
+
+	columns.forEach((column) => {
+		initalColumnStates.set(column.field, {
 			width: column.initialWidth ?? 160,
 			visible: column.isVisible ?? true,
 			pinned: column.isPinned ?? false,
@@ -54,17 +63,17 @@ function Table<RowType extends Object>({
 		selectedPage: 0,
 		rowsPerPage: rowsPerPageOptions[0].value,
 		sorting: {
-			column: props.columns[0],
+			column: columns[0],
 			direction: "asc",
 		},
-		columns: initalColumns,
+		columns: initalColumnStates,
 		searchQuery: "",
 		filters: {
 			filters: [
 				{
-					column: props.columns[0],
+					column: columns[0],
 					operator: Object.values(
-						FILTER_OPERATORS[props.columns[0].dataType],
+						FILTER_OPERATORS[columns[0].dataType],
 					)[0] as FilterOperator,
 					value: "",
 				},
@@ -272,11 +281,9 @@ function Table<RowType extends Object>({
 							...state.filters,
 							filters: [
 								{
-									column: props.columns[0],
+									column: columns[0],
 									operator: Object.values(
-										FILTER_OPERATORS[
-											props.columns[0].dataType
-										],
+										FILTER_OPERATORS[columns[0].dataType],
 									)[0] as FilterOperator,
 									value: "",
 								},
@@ -307,9 +314,9 @@ function Table<RowType extends Object>({
 						filters: [
 							...state.filters.filters,
 							{
-								column: props.columns[0],
+								column: columns[0],
 								operator: Object.values(
-									FILTER_OPERATORS[props.columns[0].dataType],
+									FILTER_OPERATORS[columns[0].dataType],
 								)[0] as FilterOperator,
 								value: "",
 							},
@@ -325,9 +332,9 @@ function Table<RowType extends Object>({
 						...state.filters,
 						filters: [
 							{
-								column: props.columns[0],
+								column: columns[0],
 								operator: Object.values(
-									FILTER_OPERATORS[props.columns[0].dataType],
+									FILTER_OPERATORS[columns[0].dataType],
 								)[0] as FilterOperator,
 								value: "",
 							},
@@ -337,33 +344,25 @@ function Table<RowType extends Object>({
 		}
 	}
 
-	// Demo
-	function changeSearchQuery(newSearchQuery: string) {
-		dispatch({
-			type: "SEARCH_QUERY_SET",
-			payload: { searchQuery: newSearchQuery },
-		});
-	}
-
 	const visibleCols = useMemo(
 		() =>
-			[...props.columns].filter(
+			[...columns].filter(
 				(col) =>
 					state.columns.get(col.field)?.visible &&
 					!state.columns.get(col.field)?.pinned,
 			),
-		[props.columns, state.columns],
+		[columns, state.columns],
 	);
 
 	const pinnedCols = useMemo(
 		() =>
-			[...props.columns].filter(
+			[...columns].filter(
 				(col) =>
 					state.columns.get(col.field)?.pinned &&
 					state.columns.get(col.field)?.visible,
 			),
 
-		[props.columns, state.columns],
+		[columns, state.columns],
 	);
 
 	const rows: TableRow<RowType>[] = useMemo(() => {
@@ -416,6 +415,8 @@ function Table<RowType extends Object>({
 		row: TableRow<RowType>,
 		filter: Filter<RowType>,
 	): boolean {
+		if (filter.column.field === "SELECT") return true;
+
 		const cellValue = row[filter.column.field];
 
 		switch (filter.column.dataType) {
@@ -475,12 +476,16 @@ function Table<RowType extends Object>({
 
 	// Sortierung anhand der ausgewählten Spalte und Richtung
 	const sortedRows = useMemo(() => {
+		if (state.sorting.column.field === "SELECT") return [...filteredRows];
+
 		if (!state.columns.get(state.sorting.column.field)?.visible)
 			return [...filteredRows];
 
 		switch (state.sorting.column.dataType) {
 			case "number": {
 				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
+					if (state.sorting.column.field === "SELECT") return 1;
+
 					const valueA = Number(rowA[state.sorting.column.field]);
 					const valueB = Number(rowB[state.sorting.column.field]);
 
@@ -492,6 +497,8 @@ function Table<RowType extends Object>({
 			}
 			case "string": {
 				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
+					if (state.sorting.column.field === "SELECT") return 1;
+
 					const valueA = String(rowA[state.sorting.column.field]);
 					const valueB = String(rowB[state.sorting.column.field]);
 
@@ -501,6 +508,8 @@ function Table<RowType extends Object>({
 				});
 				return newRows;
 			}
+			default:
+				return [...filteredRows];
 		}
 	}, [state.sorting.column, state.sorting.direction, filteredRows]);
 
@@ -513,8 +522,8 @@ function Table<RowType extends Object>({
 		return newRows;
 	}, [sortedRows, state.selectedPage, state.rowsPerPage]);
 
-	const [selectedRowIds, setSelectedRowIds] = useState<Set<number>>(
-		new Set<number>(),
+	const [hoveredRowIndex, setHoveredRowIndex] = useState<number | undefined>(
+		5,
 	);
 
 	// Wenn die gefilterten Reihen sich ändern, dann wird die erste Seite ausgewählt
@@ -527,7 +536,7 @@ function Table<RowType extends Object>({
 	}, [filteredRows, state.rowsPerPage]);
 
 	// Auswählen der Zeilen
-	function toggleRow(row: TableRow<RowType>) {
+	/* function toggleRow(row: TableRow<RowType>) {
 		if (selectedRowIds.has(row.__rowId))
 			setSelectedRowIds((prev) => {
 				prev.delete(row.__rowId);
@@ -535,10 +544,10 @@ function Table<RowType extends Object>({
 			});
 		else
 			setSelectedRowIds((prev) => new Set<number>(prev.add(row.__rowId)));
-	}
+	} */
 
 	// Es werden alle Reihen ausgewählt, nach denen momentan gefiltert wird
-	function toggleAllRows() {
+	/* function toggleAllRows() {
 		if (
 			selectedRowIds.size >= 0 &&
 			selectedRowIds.size < filteredRows.length
@@ -549,13 +558,19 @@ function Table<RowType extends Object>({
 		} else {
 			setSelectedRowIds(new Set<number>());
 		}
-	}
+	} */
 
-	const checked = useMemo(() => {
+	/* const checked = useMemo(() => {
 		if (selectedRowIds.size == 0) return false;
 		else if (selectedRowIds.size == filteredRows.length) return true;
 		else return undefined;
-	}, [selectedRowIds, rows, state.searchQuery, state.filters]);
+	}, [selectedRowIds, rows, state.searchQuery, state.filters]); */
+
+	const [tableBodyIsScrolled, setTableBodyIsScrolled] = useState(false);
+
+	const onTableBodyScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+		setTableBodyIsScrolled(e.currentTarget.scrollLeft != 0);
+	};
 
 	return (
 		<div className="min-w-200 max-w-200 text-slate-700">
@@ -569,13 +584,13 @@ function Table<RowType extends Object>({
 						<FilterPopover
 							tableState={state}
 							dispatch={dispatch}
-							columns={props.columns}
+							columns={columns}
 						></FilterPopover>
 
 						<ColumnsSettingsPopover
 							tableState={state}
 							dispatch={dispatch}
-							columns={props.columns}
+							columns={columns}
 						></ColumnsSettingsPopover>
 
 						<IconButton
@@ -621,32 +636,45 @@ function Table<RowType extends Object>({
 					Eigentliche Tabelle mit horizontaler Scrollbar, falls Breite überschritten wird.
 					Besteht aus Header, Körper und Footer.
 				*/}
-				<div className="relative max-w-full overflow-auto flex">
+				<div
+					className="relative max-w-full overflow-auto flex"
+					onScroll={(e) => onTableBodyScroll(e)}
+				>
 					{/* Gepinnte Spalten */}
-					<div className="sticky left-0 top-0 z-1 flex bg-white border-r border-slate-300">
-						{pinnedCols.map((column, index) => (
-							<Column
-								key={`column-${index}-pinned`}
-								column={column}
-								selectedRowIds={selectedRowIds}
-								paginatedRows={paginatedRows}
-								tableState={state}
-								dispatch={dispatch}
-							></Column>
-						))}
-					</div>
+					{pinnedCols.length > 0 && (
+						<div
+							className={`sticky left-0 top-0 z-1 flex bg-white border-r border-slate-300 w-fit transition-shadow duration-300 ${tableBodyIsScrolled ? "shadow-[0_0px_15px_rgba(0,0,0,0.15)]" : ""}`}
+						>
+							{pinnedCols.map((column, index) => (
+								<TableColumn
+									key={`column-${index}-pinned`}
+									column={column}
+									hoveredRowIndex={hoveredRowIndex}
+									setHoveredRowIndex={(index) =>
+										setHoveredRowIndex(index)
+									}
+									paginatedRows={paginatedRows}
+									tableState={state}
+									dispatch={dispatch}
+								></TableColumn>
+							))}
+						</div>
+					)}
 
 					{/* Normale Spalten */}
 					<div className="flex w-full">
 						{visibleCols.map((column, index) => (
-							<Column
+							<TableColumn
 								key={`column-${index}-visible`}
 								column={column}
-								selectedRowIds={selectedRowIds}
+								hoveredRowIndex={hoveredRowIndex}
+								setHoveredRowIndex={(index) =>
+									setHoveredRowIndex(index)
+								}
 								paginatedRows={paginatedRows}
 								tableState={state}
 								dispatch={dispatch}
-							></Column>
+							></TableColumn>
 						))}
 					</div>
 				</div>

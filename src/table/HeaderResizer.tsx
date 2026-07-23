@@ -54,7 +54,7 @@ const HeaderResizer: React.FC<ResizerProps> = ({
 
 	return (
 		<div
-			className={`${isResizable ? "cursor-col-resize" : ""} group min-w-3 w-full max-w-3 h-full flex justify-center items-center`}
+			className={`${isResizable ? "cursor-col-resize" : ""} group min-w-4 w-full max-w-4 h-full flex justify-center items-center`}
 			ref={resizerRef}
 		>
 			<div
