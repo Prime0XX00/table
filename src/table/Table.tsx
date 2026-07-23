@@ -21,6 +21,7 @@ import Input from "./Input";
 import EmptyRow from "./EmptyRow";
 import Cell from "./Cell";
 import Pagination from "./Pagination";
+import InfoBar from "./InfoBar";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -949,31 +950,10 @@ function Table<RowType extends Object>({
 
 			{/* Grid Footer */}
 			<div className="flex justify-between gap-x-5 items-center">
-				<div className="flex gap-x-2 mt-2 items-center">
-					<p>
-						{filteredRows.length == 0 ? (
-							<>
-								<span>{0 + " / " + 0}</span>
-							</>
-						) : (
-							<>
-								<span>
-									{state.rowsPerPage * state.selectedPage + 1}
-								</span>
-								<span>{" - "}</span>
-								<span>
-									{Math.min(
-										state.rowsPerPage *
-											(state.selectedPage + 1),
-										filteredRows.length,
-									)}
-								</span>
-								<span>{" / "}</span>
-								<span>{filteredRows.length}</span>
-							</>
-						)}
-					</p>
-				</div>
+				<InfoBar
+					tableState={state}
+					filteredRows={filteredRows}
+				></InfoBar>
 
 				<Pagination
 					tableState={state}
