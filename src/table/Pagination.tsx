@@ -15,7 +15,7 @@ interface PaginationProps<RowType> {
 
 function Pagination<RowType>({ ...props }: PaginationProps<RowType>) {
 	return (
-		<div className="flex gap-x-2 mt-2 items-center">
+		<div className="flex gap-x-2 items-center">
 			<Button
 				disabled={props.tableState.selectedPage <= 0}
 				onClick={() =>

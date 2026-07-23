@@ -22,6 +22,7 @@ import EmptyRow from "./EmptyRow";
 import Cell from "./Cell";
 import Pagination from "./Pagination";
 import InfoBar from "./InfoBar";
+import Column from "./Column";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -818,148 +819,48 @@ function Table<RowType extends Object>({
 					Besteht aus Header, Körper und Footer.
 				*/}
 				<div className="relative max-w-full overflow-auto flex">
-					{/* Pinned */}
-					<div className="sticky left-0 top-0 h-full bg-white grid grid-cols-[1fr] divide-y divide-slate-300 z-1 border-r border-slate-300">
-						<div className="flex items-center h-12 w-fit">
-							{/* 
-								Checkbox-Header
-								TODO: Muss noch automatisch generiert werden und Header Komponente nutze
-							*/}
-							<div className={`group flex h-full pl-2 w-10`}>
-								<div className="flex gap-x-2 h-full items-center w-full">
-									<Checkbox
-										checked={checked}
-										onChange={() => toggleAllRows()}
-									></Checkbox>
-								</div>
-
-								<HeaderResizer
-									isResizable={false}
-								></HeaderResizer>
-							</div>
-
-							{pinnedCols.map((column, headerIndex) => (
-								<Header
-									key={`header-pinned-${headerIndex}`}
-									column={column}
-									tableState={state}
-									dispatch={dispatch}
-								></Header>
-							))}
-						</div>
-						<div>
-							{paginatedRows?.map((row, rowIndex) => (
-								<div
-									key={`row-pinned-${rowIndex}`}
-									className={`${selectedRowIds.has(row.__rowId) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} w-full h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
-								>
-									{/* 
-										Checkbox-Zelle
-										TODO: Muss noch automatisch generiert werden und Zellen Komponente nutzen
-									*/}
-									<div
-										key={`row-${rowIndex}-cell-select`}
-										className={`px-2 w-10`}
-									>
-										<Checkbox
-											checked={selectedRowIds.has(
-												row.__rowId,
-											)}
-											onChange={() => toggleRow(row)}
-										></Checkbox>
-									</div>
-									{/* Restliche Zellen */}
-									{pinnedCols.map((column, cellIndex) => (
-										<Cell
-											key={`row-${rowIndex}-cell-${cellIndex}`}
-											column={column}
-											row={row}
-											tableState={state}
-										></Cell>
-									))}
-								</div>
-							))}
-							{paginatedRows.length < state.rowsPerPage &&
-								Array.from({
-									length:
-										state.rowsPerPage -
-										paginatedRows.length,
-								}).map((_, rowIndex) => (
-									<EmptyRow
-										key={`row-empty-${rowIndex}`}
-									></EmptyRow>
-								))}
-						</div>
-						<div className="h-12 flex items-center justify-between px-2 min-w-fit w-full"></div>
+					{/* Gepinnte Spalten */}
+					<div className="sticky left-0 top-0 z-1 h-full bg-white border-r border-slate-300">
+						{pinnedCols.map((column, index) => (
+							<Column
+								key={`column-${index}`}
+								column={column}
+								selectedRowIds={selectedRowIds}
+								paginatedRows={paginatedRows}
+								tableState={state}
+								dispatch={dispatch}
+							></Column>
+						))}
 					</div>
 
-					<div className="grid grid-cols-[1fr] divide-y divide-slate-300 w-full">
-						{/* Header-Zeile mit Header pro Spalte */}
-						<div className="flex items-center h-12 min-w-fit w-full">
-							{/* 
-								Restlichen Header, die nicht gepinnt sind
-							*/}
-							{visibleCols.map((column, headerIndex) => (
-								<Header
-									key={`header-${headerIndex}`}
-									tableState={state}
-									column={column}
-									dispatch={dispatch}
-								></Header>
-							))}
-						</div>
-
-						{/* Body-Zeilen */}
-						<div className="min-w-fit w-full">
-							{paginatedRows?.map((row, rowIndex) => (
-								<div
-									key={`row-${rowIndex}`}
-									className={`${selectedRowIds.has(row.__rowId) ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} w-full h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
-								>
-									{/* Restliche Zellen */}
-									{visibleCols.map((column, cellIndex) => (
-										<Cell
-											key={`row-${rowIndex}-cell-${cellIndex}`}
-											column={column}
-											row={row}
-											tableState={state}
-										></Cell>
-									))}
-								</div>
-							))}
-							{/* 
-								Leere Zeilen, damit die Tabellenhöhe immer gleich bleibt.
-								Generiert diese, bis die Anzahl an Reihen pro Seite eingehalten wird.
-							*/}
-							{paginatedRows.length < state.rowsPerPage &&
-								Array.from({
-									length:
-										state.rowsPerPage -
-										paginatedRows.length,
-								}).map((_, rowIndex) => (
-									<EmptyRow
-										key={`row-empty-${rowIndex}`}
-									></EmptyRow>
-								))}
-						</div>
-						{/* Footer */}
-						<div className="h-12 flex items-center justify-between px-2 min-w-fit w-full"></div>
+					{/* Normale Spalten */}
+					<div className="flex w-full">
+						{visibleCols.map((column, index) => (
+							<Column
+								key={`column-${index}`}
+								column={column}
+								selectedRowIds={selectedRowIds}
+								paginatedRows={paginatedRows}
+								tableState={state}
+								dispatch={dispatch}
+							></Column>
+						))}
 					</div>
 				</div>
-			</div>
 
-			{/* Grid Footer */}
-			<div className="flex justify-between gap-x-5 items-center">
-				<InfoBar
-					tableState={state}
-					filteredRows={filteredRows}
-				></InfoBar>
+				{/* Grid Footer */}
+				<div className="flex items-center justify-between gap-x5 h-12 min-w-fit w-full border-t border-slate-300 px-2">
+					<InfoBar
+						tableState={state}
+						filteredRows={filteredRows}
+					></InfoBar>
 
-				<Pagination
-					tableState={state}
-					dispatch={dispatch}
-					pageAmount={pageAmount}
-				></Pagination>
+					<Pagination
+						tableState={state}
+						dispatch={dispatch}
+						pageAmount={pageAmount}
+					></Pagination>
+				</div>
 			</div>
 		</div>
 	);
