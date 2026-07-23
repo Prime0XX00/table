@@ -1,11 +1,6 @@
-import Button from "./Button";
 import type { TableAction, TableState } from "../types";
-import {
-	ChevronLeftIcon,
-	ChevronRightIcon,
-	ChevronsLeftIcon,
-	ChevronsRightIcon,
-} from "lucide-react";
+
+import IconButton from "./IconButton";
 
 interface PaginationProps<RowType> {
 	pageAmount: number;
@@ -16,26 +11,24 @@ interface PaginationProps<RowType> {
 function Pagination<RowType>({ ...props }: PaginationProps<RowType>) {
 	return (
 		<div className="flex gap-x-2 items-center">
-			<Button
+			<IconButton
+				icon="chevrons-left"
 				disabled={props.tableState.selectedPage <= 0}
 				onClick={() =>
 					props.dispatch({
 						type: "PAGE_SET_FIRST",
 					})
 				}
-			>
-				<ChevronsLeftIcon></ChevronsLeftIcon>
-			</Button>
-			<Button
+			></IconButton>
+			<IconButton
+				icon="chevron-left"
 				disabled={props.tableState.selectedPage <= 0}
 				onClick={() =>
 					props.dispatch({
 						type: "PAGE_SET_PREV",
 					})
 				}
-			>
-				<ChevronLeftIcon></ChevronLeftIcon>
-			</Button>
+			></IconButton>
 			<p>
 				{props.pageAmount == 0 ? (
 					<span>{0 + " / " + 0}</span>
@@ -45,7 +38,8 @@ function Pagination<RowType>({ ...props }: PaginationProps<RowType>) {
 					</span>
 				)}
 			</p>
-			<Button
+			<IconButton
+				icon="chevron-right"
 				disabled={props.tableState.selectedPage >= props.pageAmount - 1}
 				onClick={() =>
 					props.dispatch({
@@ -53,10 +47,9 @@ function Pagination<RowType>({ ...props }: PaginationProps<RowType>) {
 						payload: { pageAmount: props.pageAmount },
 					})
 				}
-			>
-				<ChevronRightIcon></ChevronRightIcon>
-			</Button>
-			<Button
+			></IconButton>
+			<IconButton
+				icon="chevrons-right"
 				disabled={props.tableState.selectedPage >= props.pageAmount - 1}
 				onClick={() =>
 					props.dispatch({
@@ -64,9 +57,7 @@ function Pagination<RowType>({ ...props }: PaginationProps<RowType>) {
 						payload: { pageAmount: props.pageAmount },
 					})
 				}
-			>
-				<ChevronsRightIcon></ChevronsRightIcon>
-			</Button>
+			></IconButton>
 		</div>
 	);
 }
