@@ -23,6 +23,9 @@ import Cell from "./Cell";
 import Pagination from "./Pagination";
 import InfoBar from "./InfoBar";
 import Column from "./Column";
+import FilterPopover from "./popovers/FilterPopover";
+import ColumnsSettingsPopover from "./popovers/ColumnsSettingsPopover";
+import DividerX from "./DividerX";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -563,218 +566,17 @@ function Table<RowType extends Object>({
 
 					{/* Grid Optionen */}
 					<div className="flex gap-x-2 items-center h-full">
-						<Popover
-							trigger={
-								<div className="relative">
-									<IconButton icon="funnel"></IconButton>
-									{state.filters.filters.filter(
-										(filter) => filter.value != "",
-									).length > 0 && (
-										<div className="bg-blue-600 rounded-full size-2 absolute right-0 top-0"></div>
-									)}
-								</div>
-							}
-						>
-							<div className="flex flex-col gap-y-2">
-								{state.filters.filters.map((filter, index) => (
-									<div
-										className="flex gap-x-2 items-center px-2"
-										key={`filter-${index}`}
-									>
-										<IconButton
-											icon="x"
-											onClick={() =>
-												dispatch({
-													type: "FILTER_DELETE",
-													payload: { index: index },
-												})
-											}
-										></IconButton>
-										<Select
-											options={props.columns.map(
-												(col) => ({
-													value: col.field as
-														| string
-														| number,
-													display: col.title,
-												}),
-											)}
-											value={String(filter.column.field)}
-											onChange={(value) =>
-												dispatch({
-													type: "FILTER_CHANGE",
-													payload: {
-														filter: {
-															...filter,
-															column:
-																props.columns.find(
-																	(col) =>
-																		col.field ==
-																		(value as keyof RowType),
-																) ??
-																props
-																	.columns[0],
-														},
+						<FilterPopover
+							tableState={state}
+							dispatch={dispatch}
+							columns={props.columns}
+						></FilterPopover>
 
-														index: index,
-													},
-												})
-											}
-										></Select>
-										<Select
-											options={Object.values(
-												FILTER_OPERATORS[
-													state.filters.filters[index]
-														.column.dataType
-												],
-											).map((operator) => ({
-												value: operator,
-												display: operator,
-											}))}
-											value={filter.operator}
-											onChange={(value) =>
-												dispatch({
-													type: "FILTER_CHANGE",
-													payload: {
-														filter: {
-															...filter,
-															operator:
-																value as FilterOperator,
-														},
-														index: index,
-													},
-												})
-											}
-										></Select>
-										{filter.column.dataType == "boolean" ? (
-											<Select
-												options={[
-													{
-														value: "",
-														display: "-----",
-													},
-													{
-														value: "1",
-														display: "WAHR",
-													},
-													{
-														value: "0",
-														display: "FALSCH",
-													},
-												]}
-												value={filter.value}
-												onChange={(value) =>
-													dispatch({
-														type: "FILTER_CHANGE",
-														payload: {
-															filter: {
-																...filter,
-																value: value,
-															},
-															index: index,
-														},
-													})
-												}
-											></Select>
-										) : (
-											<Input
-												value={filter.value}
-												onValueChange={(value) =>
-													dispatch({
-														type: "FILTER_CHANGE",
-														payload: {
-															filter: {
-																...filter,
-																value: value,
-															},
-															index: index,
-														},
-													})
-												}
-											></Input>
-										)}
-									</div>
-								))}
-
-								<div className="border-t border-slate-300 w-full"></div>
-
-								<div className="px-2 flex items-center gap-x-2 justify-between">
-									<IconButton
-										icon="plus"
-										onClick={() =>
-											dispatch({
-												type: "FILTER_ADD",
-											})
-										}
-									></IconButton>
-									{state.filters.filters.length > 1 && (
-										<Select
-											options={[
-												{
-													value: "and",
-													display: "UND",
-												},
-												{
-													value: "or",
-													display: "ODER",
-												},
-											]}
-											value={state.filters.connection}
-											onChange={() =>
-												dispatch({
-													type: "FILTER_CONNECTION_TOGGLE",
-												})
-											}
-										></Select>
-									)}
-
-									<IconButton
-										icon="trash"
-										onClick={() =>
-											dispatch({
-												type: "FILTERS_RESET",
-											})
-										}
-									></IconButton>
-								</div>
-							</div>
-						</Popover>
-
-						<Popover
-							trigger={
-								<IconButton icon="columns-3-cog"></IconButton>
-							}
-						>
-							<div className="flex flex-col">
-								{props.columns.map((column, index) => (
-									<div
-										key={`col-toggle-${index}`}
-										className={`${
-											state.columns.get(column.field)
-												?.visible
-												? "bg-blue-50 hover:bg-blue-100"
-												: "hover:bg-slate-100"
-										} h-8.5 flex gap-x-2 px-2 items-center`}
-									>
-										<Checkbox
-											checked={
-												state.columns.get(column.field)
-													?.visible
-											}
-											onChange={() =>
-												dispatch({
-													type: "COL_TOGGLE_VISIBILITY",
-													payload: {
-														field: column.field,
-													},
-												})
-											}
-										></Checkbox>
-										<span>{column.title}</span>
-									</div>
-								))}
-							</div>
-						</Popover>
+						<ColumnsSettingsPopover
+							tableState={state}
+							dispatch={dispatch}
+							columns={props.columns}
+						></ColumnsSettingsPopover>
 
 						<IconButton
 							icon="refresh-ccw-dot"
@@ -786,18 +588,19 @@ function Table<RowType extends Object>({
 							}
 						></IconButton>
 
-						<div className="w-px h-1/2 bg-slate-200 rounded-sm"></div>
+						<DividerX></DividerX>
 
 						<IconButton icon="download"></IconButton>
 
-						<div className="w-px h-1/2 bg-slate-200 rounded-sm"></div>
+						<DividerX></DividerX>
 
 						<TableSearchField
 							searchQuery={state.searchQuery}
 							onSearchQueryChange={changeSearchQuery}
 						></TableSearchField>
 
-						<div className="w-px h-1/2 bg-slate-200 rounded-sm"></div>
+						<DividerX></DividerX>
+
 						<Select
 							options={rowsPerPageOptions.map((option) => ({
 								value: option.value,
