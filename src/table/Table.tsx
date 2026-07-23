@@ -1,9 +1,3 @@
-import {
-	ChevronLeftIcon,
-	ChevronRightIcon,
-	ChevronsLeftIcon,
-	ChevronsRightIcon,
-} from "lucide-react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import HeaderResizer from "./HeaderResizer";
 import {
@@ -20,13 +14,13 @@ import {
 import Header from "./Header";
 import TableSearchField from "./TableSearchField";
 import Checkbox from "./Checkbox";
-import Button from "./Button";
 import IconButton from "./IconButton";
 import Select from "./Select";
 import Popover from "./Popover";
 import Input from "./Input";
 import EmptyRow from "./EmptyRow";
 import Cell from "./Cell";
+import Pagination from "./Pagination";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -933,9 +927,9 @@ function Table<RowType extends Object>({
 								</div>
 							))}
 							{/* 
-							Leere Zeilen, damit die Tabellenhöhe immer gleich bleibt.
-							Generiert diese, bis die Anzahl an Reihen pro Seite eingehalten wird.
-						*/}
+								Leere Zeilen, damit die Tabellenhöhe immer gleich bleibt.
+								Generiert diese, bis die Anzahl an Reihen pro Seite eingehalten wird.
+							*/}
 							{paginatedRows.length < state.rowsPerPage &&
 								Array.from({
 									length:
@@ -981,60 +975,11 @@ function Table<RowType extends Object>({
 					</p>
 				</div>
 
-				{/* Pagination */}
-				<div className="flex gap-x-2 mt-2 items-center">
-					<Button
-						disabled={state.selectedPage <= 0}
-						onClick={() =>
-							dispatch({
-								type: "PAGE_SET_FIRST",
-							})
-						}
-					>
-						<ChevronsLeftIcon></ChevronsLeftIcon>
-					</Button>
-					<Button
-						disabled={state.selectedPage <= 0}
-						onClick={() =>
-							dispatch({
-								type: "PAGE_SET_PREV",
-							})
-						}
-					>
-						<ChevronLeftIcon></ChevronLeftIcon>
-					</Button>
-					<p>
-						{pageAmount == 0 ? (
-							<span>{0 + " / " + 0}</span>
-						) : (
-							<span>
-								{state.selectedPage + 1} / {pageAmount}
-							</span>
-						)}
-					</p>
-					<Button
-						disabled={state.selectedPage >= pageAmount - 1}
-						onClick={() =>
-							dispatch({
-								type: "PAGE_SET_NEXT",
-								payload: { pageAmount: pageAmount },
-							})
-						}
-					>
-						<ChevronRightIcon></ChevronRightIcon>
-					</Button>
-					<Button
-						disabled={state.selectedPage >= pageAmount - 1}
-						onClick={() =>
-							dispatch({
-								type: "PAGE_SET_LAST",
-								payload: { pageAmount: pageAmount },
-							})
-						}
-					>
-						<ChevronsRightIcon></ChevronsRightIcon>
-					</Button>
-				</div>
+				<Pagination
+					tableState={state}
+					dispatch={dispatch}
+					pageAmount={pageAmount}
+				></Pagination>
 			</div>
 		</div>
 	);
