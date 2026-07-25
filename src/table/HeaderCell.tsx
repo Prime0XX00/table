@@ -3,6 +3,7 @@ import HeaderResizer from "./HeaderResizer";
 import { useCallback, useState } from "react";
 import IconButton from "./IconButton";
 import ColumnActionsPopover from "./popovers/ColumnActionsPopover";
+import React from "react";
 
 interface HeaderCellProps<RowType> {
 	column: Column<RowType>;
@@ -70,7 +71,8 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 
 						{props.column.hasOptions && (
 							<ColumnActionsPopover
-								tableState={props.tableState}
+								sorting={props.tableState.sorting}
+								columnStates={props.tableState.columns}
 								dispatch={props.dispatch}
 								column={props.column}
 							></ColumnActionsPopover>
@@ -82,10 +84,10 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 			<HeaderResizer
 				isResizable={props.column.isResizable}
 				container={headerElement}
-				callback={(width) => onWidthChange(width)}
+				callback={onWidthChange}
 			></HeaderResizer>
 		</div>
 	);
 }
 
-export default HeaderCell;
+export default React.memo(HeaderCell) as typeof HeaderCell;

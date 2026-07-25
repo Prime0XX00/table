@@ -1,3 +1,4 @@
+import React from "react";
 import type { Column, TableAction, TableRow, TableState } from "../types";
 import Cell from "./Cell";
 import EmptyRow from "./EmptyRow";
@@ -37,7 +38,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 						<Cell
 							column={props.column}
 							row={row}
-							tableState={props.tableState}
+							columnStates={props.tableState.columns}
 						></Cell>
 					</div>
 				))}
@@ -68,4 +69,4 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 	);
 }
 
-export default TableColumn;
+export default React.memo(TableColumn) as typeof TableColumn;

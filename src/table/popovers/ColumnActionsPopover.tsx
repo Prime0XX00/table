@@ -1,11 +1,15 @@
 import { MoveDownIcon, MoveUpIcon, PinIcon, PinOffIcon } from "lucide-react";
-import type { Column, TableAction, TableState } from "../../types";
+import type { Column, ColumnState, SortState, TableAction } from "../../types";
 import IconButton from "../IconButton";
 import Popover from "../Popover";
 
-interface ColumnActionsPopoverProps<RowType> {
+interface ColumnActionsPopoverProps<
+	RowType,
+	ColKey extends keyof RowType = keyof RowType,
+> {
 	column: Column<RowType>;
-	tableState: TableState<RowType>;
+	columnStates: Map<ColKey, ColumnState>;
+	sorting: SortState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }
 
@@ -34,8 +38,7 @@ function ColumnActionsPopover<RowType>({
 					}
 					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
 				>
-					{props.tableState.columns.get(props.column.field)
-						?.pinned ? (
+					{props.columnStates.get(props.column.field)?.pinned ? (
 						<>
 							<PinOffIcon size={18}></PinOffIcon>
 							<span>Spalte lösen</span>
@@ -59,9 +62,8 @@ function ColumnActionsPopover<RowType>({
 					}
 					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
 				>
-					{props.tableState.sorting.column.field ==
-						props.column.field &&
-					props.tableState.sorting.direction == "asc" ? (
+					{props.sorting.column.field == props.column.field &&
+					props.sorting.direction == "asc" ? (
 						<>
 							<MoveDownIcon size={18}></MoveDownIcon>
 							<span>Absteigend sortieren</span>

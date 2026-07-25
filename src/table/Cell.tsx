@@ -1,9 +1,10 @@
-import type { Column, TableRow, TableState } from "../types";
+import React from "react";
+import type { Column, ColumnState, TableRow } from "../types";
 
-interface CellProps<RowType> {
+interface CellProps<RowType, ColKey extends keyof RowType = keyof RowType> {
 	row: TableRow<RowType>;
 	column: Column<RowType>;
-	tableState: TableState<RowType>;
+	columnStates: Map<ColKey, ColumnState>;
 }
 
 function Cell<RowType>({ ...props }: CellProps<RowType>) {
@@ -11,9 +12,7 @@ function Cell<RowType>({ ...props }: CellProps<RowType>) {
 		<div
 			className={`px-2 overflow-hidden text-ellipsis min-w-28`}
 			style={{
-				width:
-					props.tableState.columns.get(props.column.field)?.width +
-					"px",
+				width: props.columnStates.get(props.column.field)?.width + "px",
 			}}
 		>
 			{props.column.render
@@ -23,4 +22,4 @@ function Cell<RowType>({ ...props }: CellProps<RowType>) {
 	);
 }
 
-export default Cell;
+export default React.memo(Cell) as unknown as typeof Cell;
