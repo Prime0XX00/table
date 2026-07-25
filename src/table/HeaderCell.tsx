@@ -1,13 +1,14 @@
-import type { Column, TableAction, TableState } from "../types";
+import type { Column, ColumnState, SortState, TableAction } from "../types";
 import HeaderResizer from "./HeaderResizer";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import IconButton from "./IconButton";
 import ColumnActionsPopover from "./popovers/ColumnActionsPopover";
 import React from "react";
 
 interface HeaderCellProps<RowType> {
 	column: Column<RowType>;
-	tableState: TableState<RowType>;
+	columnState: ColumnState | undefined;
+	sorting: SortState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }
 
@@ -16,8 +17,24 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 		null,
 	);
 
-	const onWidthChange = useCallback(
+	useEffect(() => {
+		if (!headerElement || !props.columnState) return;
+		headerElement.style.width = props.columnState.width + "px";
+	}, [props.columnState, props.column.field, headerElement]);
+
+	const onResize = useCallback(
 		(width: number) => {
+			if (!headerElement) return;
+			headerElement.style.width = width + "px";
+		},
+		[props.dispatch, headerElement, props.column.field],
+	);
+
+	const onRelease = useCallback(
+		(width: number) => {
+			if (!headerElement) return;
+			headerElement.style.width = width + "px";
+
 			props.dispatch({
 				type: "COL_SET_WIDTH",
 				payload: {
@@ -26,18 +43,13 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 				},
 			});
 		},
-		[props.dispatch],
+		[props.dispatch, headerElement, props.column.field],
 	);
 
 	return (
 		<div
 			ref={setHeaderElement}
 			className={`group h-full pl-2 flex min-w-28`}
-			style={{
-				width:
-					props.tableState.columns.get(props.column.field)?.width +
-					"px",
-			}}
 		>
 			<div
 				className={`relative gap-x-2 h-full items-center w-full grid ${props.column.isSortable || props.column.hasOptions ? "grid-cols-[auto_1fr]" : "grid-cols-[1fr]"}`}
@@ -48,18 +60,18 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 
 				{(props.column.isSortable || props.column.hasOptions) && (
 					<div
-						className={`flex ${props.column.isSortable ? "justify-between" : "justify-end"} items-center gap-x-1 mr-1 ${props.column.field !== props.tableState.sorting.column.field ? "not-group-hover:w-0 not-group-hover:pointer-events-none" : ""} `}
+						className={`flex ${props.column.isSortable ? "justify-between" : "justify-end"} items-center gap-x-1 mr-1 ${props.column.field !== props.sorting.column.field ? "not-group-hover:w-0 not-group-hover:pointer-events-none" : ""} `}
 					>
 						{props.column.isSortable && (
 							<IconButton
 								icon={
-									props.tableState.sorting.column.field ==
+									props.sorting.column.field ==
 										props.column.field &&
-									props.tableState.sorting.direction == "desc"
+									props.sorting.direction == "desc"
 										? "move-down"
 										: "move-up"
 								}
-								className={`${props.tableState.sorting.column.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
+								className={`${props.sorting.column.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
 								onClick={() =>
 									props.dispatch({
 										type: "SORT_TOGGLE",
@@ -71,8 +83,8 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 
 						{props.column.hasOptions && (
 							<ColumnActionsPopover
-								sorting={props.tableState.sorting}
-								columnStates={props.tableState.columns}
+								sorting={props.sorting}
+								columnState={props.columnState}
 								dispatch={props.dispatch}
 								column={props.column}
 							></ColumnActionsPopover>
@@ -84,10 +96,11 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 			<HeaderResizer
 				isResizable={props.column.isResizable}
 				container={headerElement}
-				callback={onWidthChange}
+				onResize={onResize}
+				onRelease={onRelease}
 			></HeaderResizer>
 		</div>
 	);
 }
 
-export default React.memo(HeaderCell) as typeof HeaderCell;
+export default React.memo(HeaderCell) as unknown as typeof HeaderCell;

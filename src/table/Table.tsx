@@ -529,10 +529,6 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		return newRows;
 	}, [sortedRows, state.selectedPage, state.rowsPerPage]);
 
-	const [hoveredRowIndex, setHoveredRowIndex] = useState<
-		number | undefined
-	>();
-
 	// Wenn die gefilterten Reihen sich ändern, dann wird die erste Seite ausgewählt
 	// Das hat den Sinn, dass der User nach der Filterung auf einer Seite sein kann, die nicht mehr existiert
 	// Das selbe gilt für die angezeigten Reihen pro Seite
@@ -657,15 +653,15 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 							className={`sticky left-0 top-0 z-1 flex bg-white border-r border-slate-300 w-fit transition-shadow duration-300 ${tableBodyIsScrolled ? "shadow-[0_0px_15px_rgba(0,0,0,0.15)]" : ""}`}
 						>
 							{pinnedCols.map((column, index) => (
-								<TableColumn
+								<TableColumn<RowType>
 									key={`column-${index}-pinned`}
 									column={column}
-									hoveredRowIndex={hoveredRowIndex}
-									setHoveredRowIndex={(index) =>
-										setHoveredRowIndex(index)
-									}
 									paginatedRows={paginatedRows}
-									tableState={state}
+									rowsPerPage={state.rowsPerPage}
+									sorting={state.sorting}
+									columnState={state.columns.get(
+										column.field,
+									)}
 									dispatch={dispatch}
 								></TableColumn>
 							))}
@@ -675,27 +671,20 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					{/* Normale Spalten */}
 					<div className="flex w-full">
 						{visibleCols.map((column, index) => (
-							<TableColumn
+							<TableColumn<RowType>
 								key={`column-${index}-visible`}
 								column={column}
-								hoveredRowIndex={hoveredRowIndex}
-								setHoveredRowIndex={(index) =>
-									setHoveredRowIndex(index)
-								}
 								paginatedRows={paginatedRows}
-								tableState={state}
+								rowsPerPage={state.rowsPerPage}
+								sorting={state.sorting}
+								columnState={state.columns.get(column.field)}
 								dispatch={dispatch}
 							></TableColumn>
 						))}
 
 						<EmptyTableColumn
-							hoveredRowIndex={hoveredRowIndex}
-							setHoveredRowIndex={(index) =>
-								setHoveredRowIndex(index)
-							}
-							paginatedRows={paginatedRows}
-							tableState={state}
-							dispatch={dispatch}
+							paginatedRowsAmount={paginatedRows.length}
+							rowsPerPage={state.rowsPerPage}
 						></EmptyTableColumn>
 					</div>
 				</div>

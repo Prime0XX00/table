@@ -3,7 +3,8 @@ import React, { useEffect, useRef } from "react";
 interface ResizerProps {
 	isResizable?: boolean;
 	container?: HTMLDivElement | null;
-	callback?: (width: number) => void;
+	onResize?: (width: number) => void;
+	onRelease?: (width: number) => void;
 }
 
 const HeaderResizer: React.FC<ResizerProps> = ({
@@ -23,13 +24,17 @@ const HeaderResizer: React.FC<ResizerProps> = ({
 			dragRef.current = true;
 		};
 
-		const onMouseUp = () => {
+		const onMouseUp = (e: MouseEvent) => {
+			if (!dragRef.current) return;
+			const newWidth = handleMove(e.clientX);
+			props.onRelease?.(newWidth);
 			dragRef.current = false;
 		};
 
 		const onMouseMove = (e: MouseEvent) => {
 			if (!dragRef.current) return;
-			handleMove(e.clientX);
+			const newWidth = handleMove(e.clientX);
+			props.onResize?.(newWidth);
 		};
 
 		el.addEventListener("mousedown", onMouseDown);
@@ -41,15 +46,15 @@ const HeaderResizer: React.FC<ResizerProps> = ({
 			window.removeEventListener("mouseup", onMouseUp);
 			window.removeEventListener("mousemove", onMouseMove);
 		};
-	}, [props.container, props.callback]);
+	}, [props.container, props.onResize, props.onRelease]);
 
-	function handleMove(x: number) {
-		if (!resizerRef.current || !props.container) return;
+	function handleMove(x: number): number {
+		if (!resizerRef.current || !props.container) return 0;
 		const resizerRect = resizerRef.current.getBoundingClientRect();
 		const containerRect = props.container.getBoundingClientRect();
 
 		const newWidth = x + resizerRect.width / 2 - containerRect.left;
-		props.callback?.(newWidth);
+		return newWidth;
 	}
 
 	return (

@@ -3,12 +3,9 @@ import type { Column, ColumnState, SortState, TableAction } from "../../types";
 import IconButton from "../IconButton";
 import Popover from "../Popover";
 
-interface ColumnActionsPopoverProps<
-	RowType,
-	ColKey extends keyof RowType = keyof RowType,
-> {
+interface ColumnActionsPopoverProps<RowType> {
 	column: Column<RowType>;
-	columnStates: Map<ColKey, ColumnState>;
+	columnState: ColumnState | undefined;
 	sorting: SortState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }
@@ -38,7 +35,7 @@ function ColumnActionsPopover<RowType>({
 					}
 					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
 				>
-					{props.columnStates.get(props.column.field)?.pinned ? (
+					{props.columnState?.pinned ? (
 						<>
 							<PinOffIcon size={18}></PinOffIcon>
 							<span>Spalte lösen</span>
