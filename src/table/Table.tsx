@@ -19,6 +19,8 @@ import FilterPopover from "./popovers/FilterPopover";
 import ColumnsSettingsPopover from "./popovers/ColumnsSettingsPopover";
 import DividerX from "./DividerX";
 import TableColumn from "./TableColumn";
+import ExportPopover from "./popovers/ExportPopover";
+import EmptyTableColumn from "./EmptyTableColumn";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -605,7 +607,7 @@ function Table<RowType extends Object>({
 
 						<DividerX></DividerX>
 
-						<IconButton icon="download"></IconButton>
+						<ExportPopover></ExportPopover>
 
 						<DividerX></DividerX>
 
@@ -676,6 +678,16 @@ function Table<RowType extends Object>({
 								dispatch={dispatch}
 							></TableColumn>
 						))}
+
+						<EmptyTableColumn
+							hoveredRowIndex={hoveredRowIndex}
+							setHoveredRowIndex={(index) =>
+								setHoveredRowIndex(index)
+							}
+							paginatedRows={paginatedRows}
+							tableState={state}
+							dispatch={dispatch}
+						></EmptyTableColumn>
 					</div>
 				</div>
 
