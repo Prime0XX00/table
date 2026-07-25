@@ -700,9 +700,9 @@ function Table<RowType extends Object>({
 					></InfoBar>
 
 					<Pagination
-						tableState={state}
 						dispatch={dispatch}
 						pageAmount={pageAmount}
+						selectedPage={state.selectedPage}
 					></Pagination>
 				</div>
 			</div>
