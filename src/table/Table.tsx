@@ -524,9 +524,9 @@ function Table<RowType extends Object>({
 		return newRows;
 	}, [sortedRows, state.selectedPage, state.rowsPerPage]);
 
-	const [hoveredRowIndex, setHoveredRowIndex] = useState<number | undefined>(
-		5,
-	);
+	const [hoveredRowIndex, setHoveredRowIndex] = useState<
+		number | undefined
+	>();
 
 	// Wenn die gefilterten Reihen sich ändern, dann wird die erste Seite ausgewählt
 	// Das hat den Sinn, dass der User nach der Filterung auf einer Seite sein kann, die nicht mehr existiert
@@ -694,8 +694,9 @@ function Table<RowType extends Object>({
 				{/* Grid Footer */}
 				<div className="flex items-center justify-between gap-x5 h-12 min-w-fit w-full border-t border-slate-300 px-2">
 					<InfoBar
-						tableState={state}
-						filteredRows={filteredRows}
+						rowsAmount={filteredRows.length}
+						selectedPage={state.selectedPage}
+						rowsPerPage={state.rowsPerPage}
 					></InfoBar>
 
 					<Pagination

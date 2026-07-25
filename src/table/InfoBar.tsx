@@ -1,38 +1,34 @@
-import type { TableRow, TableState } from "../types";
+import React from "react";
 
-interface InfoBarProps<RowType> {
-	filteredRows: TableRow<RowType>[];
-	tableState: TableState<RowType>;
+interface InfoBarProps {
+	rowsAmount: number;
+	rowsPerPage: number;
+	selectedPage: number;
 }
 
-function InfoBar<RowType>({ ...props }: InfoBarProps<RowType>) {
+function InfoBar({ ...props }: InfoBarProps) {
 	return (
 		<p>
-			{props.filteredRows.length == 0 ? (
+			{props.rowsAmount == 0 ? (
 				<>
 					<span>{0 + " / " + 0}</span>
 				</>
 			) : (
 				<>
-					<span>
-						{props.tableState.rowsPerPage *
-							props.tableState.selectedPage +
-							1}
-					</span>
+					<span>{props.rowsPerPage * props.selectedPage + 1}</span>
 					<span>{" - "}</span>
 					<span>
 						{Math.min(
-							props.tableState.rowsPerPage *
-								(props.tableState.selectedPage + 1),
-							props.filteredRows.length,
+							props.rowsPerPage * (props.selectedPage + 1),
+							props.rowsAmount,
 						)}
 					</span>
 					<span>{" / "}</span>
-					<span>{props.filteredRows.length}</span>
+					<span>{props.rowsAmount}</span>
 				</>
 			)}
 		</p>
 	);
 }
 
-export default InfoBar;
+export default React.memo(InfoBar);
