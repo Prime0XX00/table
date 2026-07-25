@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import {
 	FILTER_OPERATORS,
 	type ColumnState,
 	type Filter,
 	type FilterOperator,
-	type RowsPerPageOption,
 	type TableAction,
 	type TableRow,
 	type TableState,
@@ -12,7 +11,7 @@ import {
 } from "../types";
 import TableSearchField from "./TableSearchField";
 import IconButton from "./IconButton";
-import Select from "./Select";
+import Select, { type SelectOption } from "./Select";
 import Pagination from "./Pagination";
 import InfoBar from "./InfoBar";
 import FilterPopover from "./popovers/FilterPopover";
@@ -26,13 +25,19 @@ interface TableProps<RowType extends Object> {
 	title: string;
 	rows: Array<RowType> | undefined;
 	columns: Column<RowType>[];
-	rowsPerPageOptions?: RowsPerPageOption[];
+	rowsPerPageOptions?: SelectOption[];
 }
 
-function Table<RowType extends Object>({
-	rowsPerPageOptions = [{ value: 10 }, { value: 20 }, { value: 50 }],
-	...props
-}: TableProps<RowType>) {
+function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
+	const rowsPerPageOptions = useMemo(
+		() =>
+			props.rowsPerPageOptions ?? [
+				{ value: 10, display: "10" },
+				{ value: 20, display: "20" },
+				{ value: 50, display: "50" },
+			],
+		[props.rowsPerPageOptions],
+	);
 	const columns = useMemo(() => {
 		return [
 			...props.columns.map((column) => {
@@ -63,7 +68,7 @@ function Table<RowType extends Object>({
 	// Startwerte für die Tabelle
 	const initialState: TableState<RowType> = {
 		selectedPage: 0,
-		rowsPerPage: rowsPerPageOptions[0].value,
+		rowsPerPage: Number(rowsPerPageOptions[0].value),
 		sorting: {
 			column: columns[0],
 			direction: "asc",
@@ -92,8 +97,8 @@ function Table<RowType extends Object>({
 		switch (action.type) {
 			// Funktion zum Setzen des gesamten Tabellenstatus.
 			// Verwenden, um den Initialen State und optional noch Presets zu laden.
-			case "STATE_SET":
-				return action.payload.state;
+			case "STATE_RESET":
+				return initialState;
 
 			// Sortierfunktionalität
 			// Entweder wird die momentane Suche getoggelt oder eine neue Spalte zur Suche ausgewählt
@@ -574,6 +579,23 @@ function Table<RowType extends Object>({
 		setTableBodyIsScrolled(e.currentTarget.scrollLeft != 0);
 	};
 
+	const resetState = useCallback(
+		() =>
+			dispatch({
+				type: "STATE_RESET",
+			}),
+		[dispatch],
+	);
+
+	const changeRowsPerPage = useCallback(
+		(value: string | number) =>
+			dispatch({
+				type: "ROWS_PER_PAGE_SET",
+				payload: { rowsPerPage: value as number },
+			}),
+		[dispatch],
+	);
+
 	return (
 		<div className="min-w-200 max-w-200 text-slate-700">
 			<div className="border border-slate-300 rounded-sm bg-white overflow-hidden">
@@ -584,25 +606,20 @@ function Table<RowType extends Object>({
 					{/* Grid Optionen */}
 					<div className="flex gap-x-2 items-center h-full">
 						<FilterPopover
-							tableState={state}
+							filters={state.filters}
 							dispatch={dispatch}
 							columns={columns}
 						></FilterPopover>
 
 						<ColumnsSettingsPopover
-							tableState={state}
+							columnStates={state.columns}
 							dispatch={dispatch}
 							columns={columns}
 						></ColumnsSettingsPopover>
 
 						<IconButton
 							icon="refresh-ccw-dot"
-							onClick={() =>
-								dispatch({
-									type: "STATE_SET",
-									payload: { state: initialState },
-								})
-							}
+							onClick={resetState}
 						></IconButton>
 
 						<DividerX></DividerX>
@@ -612,24 +629,16 @@ function Table<RowType extends Object>({
 						<DividerX></DividerX>
 
 						<TableSearchField
-							tableState={state}
+							searchQuery={state.searchQuery}
 							dispatch={dispatch}
 						></TableSearchField>
 
 						<DividerX></DividerX>
 
 						<Select
-							options={rowsPerPageOptions.map((option) => ({
-								value: option.value,
-								display: String(option.value),
-							}))}
+							options={rowsPerPageOptions}
 							value={state.rowsPerPage}
-							onChange={(value) =>
-								dispatch({
-									type: "ROWS_PER_PAGE_SET",
-									payload: { rowsPerPage: value as number },
-								})
-							}
+							onChange={changeRowsPerPage}
 						></Select>
 					</div>
 				</div>

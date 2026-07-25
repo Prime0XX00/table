@@ -3,16 +3,17 @@ import {
 	FILTER_OPERATORS,
 	type Column,
 	type FilterOperator,
+	type FilterState,
 	type TableAction,
-	type TableState,
 } from "../../types";
 import Popover from "../Popover";
 import Select from "../Select";
 import Input from "../Input";
+import React from "react";
 
 interface FilterPopoverProps<RowType> {
 	columns: Column<RowType>[];
-	tableState: TableState<RowType>;
+	filters: FilterState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
 }
 
@@ -22,7 +23,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 			trigger={
 				<div className="relative">
 					<IconButton icon="funnel"></IconButton>
-					{props.tableState.filters.filters.filter(
+					{props.filters.filters.filter(
 						(filter) => filter.value != "",
 					).length > 0 && (
 						<div className="bg-blue-600 rounded-full size-2 absolute right-0 top-0"></div>
@@ -31,7 +32,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 			}
 		>
 			<div className="flex flex-col gap-y-2">
-				{props.tableState.filters.filters.map((filter, index) => (
+				{props.filters.filters.map((filter, index) => (
 					<div
 						className="flex gap-x-2 items-center px-2"
 						key={`filter-${index}`}
@@ -73,8 +74,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 						<Select
 							options={Object.values(
 								FILTER_OPERATORS[
-									props.tableState.filters.filters[index]
-										.column.dataType
+									props.filters.filters[index].column.dataType
 								],
 							).map((operator) => ({
 								value: operator,
@@ -155,7 +155,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 							})
 						}
 					></IconButton>
-					{props.tableState.filters.filters.length > 1 && (
+					{props.filters.filters.length > 1 && (
 						<Select
 							options={[
 								{
@@ -167,7 +167,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 									display: "ODER",
 								},
 							]}
-							value={props.tableState.filters.connection}
+							value={props.filters.connection}
 							onChange={() =>
 								props.dispatch({
 									type: "FILTER_CONNECTION_TOGGLE",
@@ -190,4 +190,4 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 	);
 }
 
-export default FilterPopover;
+export default React.memo(FilterPopover) as typeof FilterPopover;

@@ -1,10 +1,11 @@
 import { SearchIcon, XCircleIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import IconButton from "./IconButton";
-import type { TableAction, TableState } from "../types";
+import type { TableAction } from "../types";
+import React from "react";
 
 interface TableSearchFieldProps<RowType> {
-	tableState: TableState<RowType>;
+	searchQuery: string;
 	dispatch: (action: TableAction<RowType>) => void;
 }
 
@@ -19,7 +20,7 @@ function TableSearchField<RowType>({
 		const handleClickOutside = (e: any) => {
 			if (!searchFieldRef.current) return;
 			if (!expanded) return;
-			if (props.tableState.searchQuery) return;
+			if (props.searchQuery) return;
 
 			const isOutside = !searchFieldRef.current.contains(e.target);
 
@@ -33,7 +34,7 @@ function TableSearchField<RowType>({
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [searchFieldRef, expanded, props.tableState.searchQuery]);
+	}, [searchFieldRef, expanded, props.searchQuery]);
 
 	return (
 		<div className="relative flex items-center">
@@ -55,7 +56,7 @@ function TableSearchField<RowType>({
 					name="searchQuery"
 					placeholder="Suchen..."
 					className="focus:outline-none w-full"
-					value={props.tableState.searchQuery}
+					value={props.searchQuery}
 					onChange={(e) =>
 						props.dispatch({
 							type: "SEARCH_QUERY_SET",
@@ -63,7 +64,7 @@ function TableSearchField<RowType>({
 						})
 					}
 				></input>
-				{props.tableState.searchQuery && (
+				{props.searchQuery && (
 					<div
 						className="p-1 rounded-full hover:bg-slate-100 cursor-pointer"
 						onClick={() =>
@@ -84,4 +85,4 @@ function TableSearchField<RowType>({
 	);
 }
 
-export default TableSearchField;
+export default React.memo(TableSearchField) as typeof TableSearchField;

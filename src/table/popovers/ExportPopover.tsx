@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import IconButton from "../IconButton";
 import Popover from "../Popover";
+import React from "react";
 
 interface ExportPopoverProps {}
 
@@ -29,4 +30,4 @@ const ExportPopover: React.FC<ExportPopoverProps> = ({ ...props }) => {
 	);
 };
 
-export default ExportPopover;
+export default React.memo(ExportPopover);

@@ -100,7 +100,7 @@ export type TableAction<
 	RowType,
 	ColKey extends keyof RowType = keyof RowType,
 > =
-	| { type: "STATE_SET"; payload: { state: TableState<RowType> } }
+	| { type: "STATE_RESET" }
 	| { type: "SORT_TOGGLE"; payload: { column: Column<RowType> } }
 	| { type: "PAGE_SET_FIRST" }
 	| { type: "PAGE_SET_PREV" }
@@ -122,7 +122,3 @@ export type TableAction<
 	| { type: "FILTER_DELETE"; payload: { index: number } }
 	| { type: "FILTER_ADD" }
 	| { type: "FILTERS_RESET" };
-
-export interface RowsPerPageOption {
-	value: number;
-}

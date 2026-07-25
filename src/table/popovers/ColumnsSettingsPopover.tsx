@@ -1,11 +1,12 @@
 import Popover from "../Popover";
 import IconButton from "../IconButton";
 import Checkbox from "../Checkbox";
-import type { Column, TableAction, TableState } from "../../types";
+import type { Column, ColumnState, TableAction } from "../../types";
+import React from "react";
 
 interface ColumnsSettingsPopoverProps<RowType> {
 	columns: Column<RowType>[];
-	tableState: TableState<RowType>;
+	columnStates: Map<keyof RowType, ColumnState>;
 	dispatch: (action: TableAction<RowType>) => void;
 }
 
@@ -19,15 +20,14 @@ function ColumnsSettingsPopover<RowType>({
 					<div
 						key={`col-toggle-${index}`}
 						className={`${
-							props.tableState.columns.get(column.field)?.visible
+							props.columnStates.get(column.field)?.visible
 								? "bg-blue-50 hover:bg-blue-100"
 								: "hover:bg-slate-100"
 						} h-8.5 flex gap-x-2 px-2 items-center`}
 					>
 						<Checkbox
 							checked={
-								props.tableState.columns.get(column.field)
-									?.visible
+								props.columnStates.get(column.field)?.visible
 							}
 							onChange={() =>
 								props.dispatch({
@@ -46,4 +46,6 @@ function ColumnsSettingsPopover<RowType>({
 	);
 }
 
-export default ColumnsSettingsPopover;
+export default React.memo(
+	ColumnsSettingsPopover,
+) as typeof ColumnsSettingsPopover;

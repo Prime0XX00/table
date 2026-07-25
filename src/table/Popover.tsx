@@ -133,4 +133,4 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 	);
 };
 
-export default Popover;
+export default React.memo(Popover);
