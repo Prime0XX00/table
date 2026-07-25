@@ -100,7 +100,7 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [visible]);
+	}, [visible, props.trigger, props.children]);
 
 	const nestingContextValue = useMemo<PopoverNestingContextValue>(
 		() => ({ registerDescendant }),
@@ -118,7 +118,7 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 				createPortal(
 					<div
 						ref={popoverRef}
-						className="z-100 border border-slate-300 py-2 rounded-sm bg-white absolute shadow-lg"
+						className="z-100 border border-slate-300 py-2 rounded-sm bg-white text-slate-700 absolute shadow-lg"
 						style={{ left: position.left, top: position.top }}
 					>
 						<PopoverNestingContext.Provider

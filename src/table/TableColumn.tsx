@@ -19,6 +19,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 			{/* Header-Zelle */}
 			<div className="h-12 border-b border-slate-300">
 				<HeaderCell
+					key={String(props.column.field)}
 					tableState={props.tableState}
 					column={props.column}
 					dispatch={props.dispatch}

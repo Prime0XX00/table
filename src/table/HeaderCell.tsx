@@ -2,6 +2,7 @@ import type { Column, TableAction, TableState } from "../types";
 import HeaderResizer from "./HeaderResizer";
 import { useCallback, useState } from "react";
 import IconButton from "./IconButton";
+import ColumnActionsPopover from "./popovers/ColumnActionsPopover";
 
 interface HeaderCellProps<RowType> {
 	column: Column<RowType>;
@@ -68,18 +69,11 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 						)}
 
 						{props.column.hasOptions && (
-							<IconButton
-								onClick={() =>
-									props.dispatch({
-										type: "COL_TOGGLE_PIN",
-										payload: {
-											field: props.column.field,
-										},
-									})
-								}
-								icon="ellipsis-vertical"
-								className="group-hover:opacity-100 opacity-0"
-							></IconButton>
+							<ColumnActionsPopover
+								tableState={props.tableState}
+								dispatch={props.dispatch}
+								column={props.column}
+							></ColumnActionsPopover>
 						)}
 					</div>
 				)}
