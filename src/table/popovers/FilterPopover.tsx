@@ -1,6 +1,5 @@
 import IconButton from "../IconButton";
 import {
-	FILTER_OPERATORS,
 	type Column,
 	type FilterOperator,
 	type FilterState,
@@ -10,6 +9,7 @@ import Popover from "../Popover";
 import Select from "../Select";
 import Input from "../Input";
 import React from "react";
+import { FILTER_OPERATORS } from "../../consts";
 
 interface FilterPopoverProps<RowType> {
 	columns: Column<RowType>[];

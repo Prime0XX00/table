@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import {
-	FILTER_OPERATORS,
 	type ColumnState,
 	type Filter,
 	type FilterOperator,
@@ -20,6 +19,7 @@ import DividerX from "./DividerX";
 import TableColumn from "./TableColumn";
 import ExportPopover from "./popovers/ExportPopover";
 import EmptyTableColumn from "./EmptyTableColumn";
+import { FILTER_OPERATORS, initialColWidth } from "../consts";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -46,7 +46,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					isVisible: column.isVisible ?? true,
 					isPinned: column.isPinned ?? false,
 					isSortable: column.isSortable ?? true,
-					initialWidth: column.initialWidth ?? 160,
+					initialWidth: column.initialWidth ?? initialColWidth,
 					...column,
 				};
 				return col;
@@ -59,7 +59,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 
 	columns.forEach((column) => {
 		initalColumnStates.set(column.field, {
-			width: column.initialWidth ?? 160,
+			width: column.initialWidth ?? initialColWidth,
 			visible: column.isVisible ?? true,
 			pinned: column.isPinned ?? false,
 		});
@@ -475,7 +475,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		const cellValue = row[filter.column.field];
 
 		switch (filter.column.dataType) {
-			case "string":
+			case "string": {
 				const stringCellValue = String(cellValue).toUpperCase();
 				const stringFilterValue = String(filter.value).toUpperCase();
 				switch (filter.operator) {
@@ -490,7 +490,8 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					default:
 						return true;
 				}
-			case "number":
+			}
+			case "number": {
 				switch (filter.operator) {
 					case FILTER_OPERATORS[filter.column.dataType].E:
 						return cellValue == filter.value;
@@ -507,7 +508,8 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					default:
 						return true;
 				}
-			case "boolean":
+			}
+			case "boolean": {
 				switch (filter.operator) {
 					case FILTER_OPERATORS[filter.column.dataType].E:
 						return filter.value === ""
@@ -516,8 +518,26 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					default:
 						return true;
 				}
-			case "date":
-				return true;
+			}
+			case "date": {
+				const [YYYY, MM, DD] = String(filter.value).split("-");
+				if (!YYYY || !MM || !DD) return true;
+
+				const dateFilterValue = new Date(
+					Number(YYYY),
+					Number(MM) - 1,
+					Number(DD),
+				);
+
+				switch (filter.operator) {
+					case FILTER_OPERATORS[filter.column.dataType].LT:
+						return cellValue <= dateFilterValue;
+					case FILTER_OPERATORS[filter.column.dataType].GT:
+						return cellValue >= dateFilterValue;
+					default:
+						return true;
+				}
+			}
 		}
 	}
 
@@ -567,7 +587,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 				});
 				return newRows;
 			}
-			case "boolean":
+			case "boolean": {
 				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
 					const valueA = Number(rowA[col.field]);
 					const valueB = Number(rowB[col.field]);
@@ -577,6 +597,18 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 						: valueB - valueA;
 				});
 				return newRows;
+			}
+			case "date": {
+				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
+					const valueA = rowA[col.field] as Date;
+					const valueB = rowB[col.field] as Date;
+
+					return state.sorting.direction == "asc"
+						? valueA.getTime() - valueB.getTime()
+						: valueB.getTime() - valueA.getTime();
+				});
+				return newRows;
+			}
 
 			default:
 				return [...filteredRows];

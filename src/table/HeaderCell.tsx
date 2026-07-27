@@ -1,39 +1,45 @@
-import type { Column, ColumnState, SortState, TableAction } from "../types";
+import {
+	type Column,
+	type ColumnState,
+	type SortState,
+	type TableAction,
+} from "../types";
 import HeaderResizer from "./HeaderResizer";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import IconButton from "./IconButton";
 import ColumnActionsPopover from "./popovers/ColumnActionsPopover";
 import React from "react";
+import { minColWidth } from "../consts";
 
 interface HeaderCellProps<RowType> {
 	column: Column<RowType>;
 	columnState: ColumnState | undefined;
 	sorting: SortState<RowType>;
 	dispatch: (action: TableAction<RowType>) => void;
+	container: HTMLDivElement | null;
 }
 
 function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
-	const [headerElement, setHeaderElement] = useState<HTMLDivElement | null>(
-		null,
-	);
-
 	useEffect(() => {
-		if (!headerElement || !props.columnState) return;
-		headerElement.style.width = props.columnState.width + "px";
-	}, [props.columnState, props.column.field, headerElement]);
+		if (!props.container || !props.columnState) return;
+		props.container.style.minWidth =
+			Math.max(props.columnState.width, minColWidth) + "px";
+	}, [props.container]);
 
 	const onResize = useCallback(
 		(width: number) => {
-			if (!headerElement) return;
-			headerElement.style.width = width + "px";
+			if (!props.container) return;
+			props.container.style.minWidth =
+				Math.max(width, minColWidth) + "px";
 		},
-		[props.dispatch, headerElement, props.column.field],
+		[props.dispatch, props.container, props.column.field],
 	);
 
 	const onRelease = useCallback(
 		(width: number) => {
-			if (!headerElement) return;
-			headerElement.style.width = width + "px";
+			if (!props.container) return;
+			props.container.style.minWidth =
+				Math.max(width, minColWidth) + "px";
 
 			props.dispatch({
 				type: "COL_SET_WIDTH",
@@ -43,14 +49,11 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 				},
 			});
 		},
-		[props.dispatch, headerElement, props.column.field],
+		[props.dispatch, props.container, props.column.field],
 	);
 
 	return (
-		<div
-			ref={setHeaderElement}
-			className={`group h-full pl-2 flex min-w-28`}
-		>
+		<div className={`group h-full pl-2 flex min-w-28`}>
 			<div
 				className={`relative gap-x-2 h-full items-center w-full grid ${props.column.isSortable || props.column.hasOptions ? "grid-cols-[auto_1fr]" : "grid-cols-[1fr]"}`}
 			>
@@ -95,7 +98,7 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 
 			<HeaderResizer
 				isResizable={props.column.isResizable}
-				container={headerElement}
+				container={props.container}
 				onResize={onResize}
 				onRelease={onRelease}
 			></HeaderResizer>

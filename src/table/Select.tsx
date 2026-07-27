@@ -16,6 +16,7 @@ export interface SelectOption {
 
 const Select: React.FC<SelectProps> = ({ ...props }) => {
 	useEffect(() => {
+		if (props.options.length == 0) return;
 		setSelectedOption(
 			props.options.find((option) => option.value === props.value) ??
 				props.options[0],
@@ -52,7 +53,7 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 			props.options.map((option, index) => (
 				<div
 					key={`option-${index}`}
-					className={`${option.value == selectedOption.value ? "bg-blue-50 hover:bg-blue-100" : "hover:bg-slate-100"} n cursor-pointer px-2 h-8.5 flex items-center justify-center`}
+					className={`${option.value == selectedOption.value ? "bg-blue-600 text-white" : "hover:bg-slate-100"} cursor-pointer px-2 h-8.5 flex items-center justify-center`}
 					onClick={() => onChange(option)}
 				>
 					{option.display}

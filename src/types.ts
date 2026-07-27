@@ -67,28 +67,9 @@ export type FilterOperator =
 	| "Gleich"
 	| "Ungleich"
 	| "Enthält"
-	| "Enthält nicht";
-
-export const FILTER_OPERATORS = {
-	number: {
-		E: "=",
-		NE: "!=",
-		LT: "<",
-		LTE: "<=",
-		GT: ">",
-		GTE: ">=",
-	},
-	boolean: {
-		E: "Gleich",
-	},
-	string: {
-		E: "Gleich",
-		NE: "Ungleich",
-		C: "Enthält",
-		NC: "Enthält nicht",
-	},
-	date: {},
-};
+	| "Enthält nicht"
+	| "Vor"
+	| "Nach";
 
 export interface ColumnState {
 	width: number;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type {
 	Column,
 	ColumnState,
@@ -22,12 +22,20 @@ interface ColumnProps<RowType> {
 }
 
 function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
+	const [headerElement, setHeaderElement] = useState<HTMLDivElement | null>(
+		null,
+	);
+
 	return (
-		<div className={`flex flex-col w-fit`}>
+		<div
+			ref={setHeaderElement}
+			className={`flex flex-col`}
+		>
 			{/* Header-Zelle */}
 			<div className="h-12 border-b border-slate-300">
 				<HeaderCell
 					key={String(props.column.field)}
+					container={headerElement}
 					columnState={props.columnState}
 					sorting={props.sorting}
 					column={props.column}

@@ -1,5 +1,5 @@
-import { CheckIcon, XIcon } from "lucide-react";
 import Table from "./table/Table";
+import Checkbox from "./table/Checkbox";
 
 type Article = {
 	id: number;
@@ -7,6 +7,7 @@ type Article = {
 	percent: number;
 	status: string;
 	active: boolean;
+	date: Date;
 };
 
 const status = [
@@ -24,6 +25,7 @@ const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 	percent: Number((100 * Math.random()).toFixed(2)),
 	status: status[Math.ceil(Math.random() * 6) - 1],
 	active: index % 3 == 0,
+	date: new Date(new Date().valueOf() - Math.random() * 1e12),
 }));
 
 function App() {
@@ -68,16 +70,19 @@ function App() {
 						title: "Aktiv",
 						dataType: "boolean",
 						render: (value) => (
-							<div
-								className={`${value ? "bg-green-600/15 text-green-600" : "bg-red-600/15 text-red-600"} p-1 rounded-lg w-fit`}
-							>
-								{value ? (
-									<CheckIcon size={18}></CheckIcon>
-								) : (
-									<XIcon size={18}></XIcon>
-								)}
-							</div>
+							<Checkbox
+								checked={Boolean(value)}
+								readonly
+							></Checkbox>
 						),
+					},
+					{
+						field: "date",
+						title: "Datum",
+						dataType: "date",
+						render: (rawDate) => {
+							return rawDate.toLocaleString();
+						},
 					},
 				]}
 			></Table>
