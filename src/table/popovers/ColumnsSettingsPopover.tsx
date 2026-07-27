@@ -21,8 +21,8 @@ function ColumnsSettingsPopover<RowType>({
 						key={`col-toggle-${index}`}
 						className={`${
 							props.columnStates.get(column.field)?.visible
-								? "bg-blue-50 hover:bg-blue-100"
-								: "hover:bg-slate-100"
+								? "bg-accent/10 hover:bg-accent/15"
+								: "hover:bg-main-hover"
 						} h-8.5 flex gap-x-2 px-2 items-center`}
 					>
 						<Checkbox

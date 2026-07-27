@@ -32,7 +32,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 			className={`flex flex-col`}
 		>
 			{/* Header-Zelle */}
-			<div className="h-12 border-b border-slate-300">
+			<div className="h-12 border-b border-border">
 				<HeaderCell
 					key={String(props.column.field)}
 					container={headerElement}
@@ -48,7 +48,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 				{props.paginatedRows.map((row, rowIndex) => (
 					<div
 						key={`row-${rowIndex}-cell`}
-						className={`h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
+						className={`h-8.5 border-b border-border last:border-0 flex items-center`}
 					>
 						<Cell
 							column={props.column}
@@ -69,7 +69,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 				))}
 
 			{/* Footer Zelle */}
-			<div className="h-12 flex items-center justify-between px-2 border-t border-slate-300 min-w-28 w-full"></div>
+			<div className="h-12 flex items-center justify-between px-2 border-t border-border min-w-28 w-full"></div>
 		</div>
 	);
 }

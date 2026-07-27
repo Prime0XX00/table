@@ -30,7 +30,7 @@ const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 
 function App() {
 	return (
-		<div className="p-10 flex flex-col gap-y-10 h-screen">
+		<div className="p-10 flex flex-col gap-y-10 min-h-screen">
 			<Table<Article>
 				title="Artikeldaten"
 				rows={rows}
@@ -57,9 +57,9 @@ function App() {
 						dataType: "number",
 						initialWidth: 250,
 						render: (value) => (
-							<div className="relative bg-slate-200 rounded-full h-2 w-full overflow-hidden">
+							<div className="relative bg-main-hover rounded-full h-2 w-full overflow-hidden">
 								<div
-									className="absolute left-0 top-0 h-full bg-blue-600"
+									className="absolute left-0 top-0 h-full bg-accent"
 									style={{ width: value + "%" }}
 								></div>
 							</div>

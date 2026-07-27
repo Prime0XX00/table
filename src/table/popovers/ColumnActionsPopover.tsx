@@ -39,7 +39,7 @@ function ColumnActionsPopover<RowType>({
 							},
 						})
 					}
-					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
+					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 				>
 					{props.columnState?.pinned ? (
 						<>
@@ -54,7 +54,7 @@ function ColumnActionsPopover<RowType>({
 					)}
 				</div>
 
-				<div className="border-t border-slate-200 w-full my-2"></div>
+				<div className="border-t border-border w-full my-2"></div>
 
 				{props.sorting.column?.field == props.column.field ? (
 					<>
@@ -68,7 +68,7 @@ function ColumnActionsPopover<RowType>({
 										},
 									})
 								}
-								className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
+								className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 							>
 								<MoveDownIcon size={18}></MoveDownIcon>
 								<span>Absteigend sortieren</span>
@@ -83,7 +83,7 @@ function ColumnActionsPopover<RowType>({
 										},
 									})
 								}
-								className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
+								className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 							>
 								<MoveUpIcon size={18}></MoveUpIcon>
 								<span>Aufsteigend sortieren</span>
@@ -98,7 +98,7 @@ function ColumnActionsPopover<RowType>({
 									},
 								})
 							}
-							className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
+							className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 						>
 							<MinusIcon size={18}></MinusIcon>
 							<span>Sortierung entfernen</span>
@@ -115,7 +115,7 @@ function ColumnActionsPopover<RowType>({
 									},
 								})
 							}
-							className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
+							className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:main-hover cursor-pointer"
 						>
 							<MoveUpIcon size={18}></MoveUpIcon>
 							<span>Aufsteigend sortieren</span>
@@ -129,7 +129,7 @@ function ColumnActionsPopover<RowType>({
 									},
 								})
 							}
-							className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-slate-100 cursor-pointer"
+							className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:main-hover cursor-pointer"
 						>
 							<MoveDownIcon size={18}></MoveDownIcon>
 							<span>Absteigend sortieren</span>

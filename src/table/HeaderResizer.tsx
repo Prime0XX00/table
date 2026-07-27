@@ -63,7 +63,7 @@ const HeaderResizer: React.FC<ResizerProps> = ({
 			ref={resizerRef}
 		>
 			<div
-				className={`${isResizable ? "group-hover:bg-blue-600 group-hover:w-1 transition-all" : ""} bg-slate-200 rounded-sm w-px h-1/2`}
+				className={`${isResizable ? "group-hover:bg-accent group-hover:w-1 transition-all" : ""} bg-border rounded-sm w-px h-1/2`}
 			></div>
 		</div>
 	);

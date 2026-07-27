@@ -10,7 +10,7 @@ function EmptyTableColumn({ ...props }: EmptyColumnProps) {
 	return (
 		<div className={`flex flex-col w-full`}>
 			{/* Header-Zelle */}
-			<div className="h-12 border-b border-slate-300"></div>
+			<div className="h-12 border-b border-border"></div>
 
 			<div>
 				{/* Body Zellen */}
@@ -18,7 +18,7 @@ function EmptyTableColumn({ ...props }: EmptyColumnProps) {
 					(_, rowIndex) => (
 						<div
 							key={`row-${rowIndex}-cell`}
-							className={`h-8.5 border-b border-slate-300 last:border-0 flex items-center`}
+							className={`h-8.5 border-b border-border last:border-0 flex items-center`}
 						></div>
 					),
 				)}
@@ -35,7 +35,7 @@ function EmptyTableColumn({ ...props }: EmptyColumnProps) {
 				))}
 
 			{/* Footer Zelle */}
-			<div className="h-12 flex items-center justify-between border-t border-slate-300"></div>
+			<div className="h-12 flex items-center justify-between border-t border-border"></div>
 		</div>
 	);
 }

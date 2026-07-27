@@ -26,7 +26,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 					{props.filters.filters.filter(
 						(filter) => filter.value != "",
 					).length > 0 && (
-						<div className="bg-blue-600 rounded-full size-2 absolute right-0 top-0"></div>
+						<div className="bg-accent rounded-full size-2 absolute right-0 top-0"></div>
 					)}
 				</div>
 			}
@@ -144,7 +144,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 					</div>
 				))}
 
-				<div className="border-t border-slate-300 w-full"></div>
+				<div className="border-t border-border w-full"></div>
 
 				<div className="px-2 flex items-center gap-x-2 justify-between">
 					<IconButton

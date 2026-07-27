@@ -24,12 +24,16 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 		if (!props.container || !props.columnState) return;
 		props.container.style.minWidth =
 			Math.max(props.columnState.width, minColWidth) + "px";
+		props.container.style.maxWidth =
+			Math.max(props.columnState.width, minColWidth) + "px";
 	}, [props.container]);
 
 	const onResize = useCallback(
 		(width: number) => {
 			if (!props.container) return;
 			props.container.style.minWidth =
+				Math.max(width, minColWidth) + "px";
+			props.container.style.maxWidth =
 				Math.max(width, minColWidth) + "px";
 		},
 		[props.dispatch, props.container, props.column.field],
@@ -39,6 +43,8 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 		(width: number) => {
 			if (!props.container) return;
 			props.container.style.minWidth =
+				Math.max(width, minColWidth) + "px";
+			props.container.style.maxWidth =
 				Math.max(width, minColWidth) + "px";
 
 			props.dispatch({

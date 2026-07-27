@@ -22,7 +22,7 @@ const Checkbox: React.FC<CheckboxProps> = ({ ...props }) => {
 	return (
 		<div
 			onClick={!props.readonly ? () => onChange(!checked) : undefined}
-			className={`${checked != false ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"} ${props.readonly ? "" : "cursor-pointer"} size-4 border rounded-sm flex items-center justify-center`}
+			className={`${checked != false ? "bg-accent border-accent text-main" : "border-border bg-main"} ${props.readonly ? "" : "cursor-pointer"} size-4 border rounded-sm flex items-center justify-center`}
 		>
 			{checked == true && <CheckIcon></CheckIcon>}
 			{checked == undefined && <MinusIcon></MinusIcon>}

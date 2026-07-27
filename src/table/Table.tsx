@@ -466,12 +466,11 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		return filteredNewRows;
 	}, [rows, state.searchQuery, state.columns, state.filters]);
 
+	// TODO: filtervalue als param übergeben, damit nicht jede iteration z.B. das Datum erzeugt werden muss
 	function dynamicFilter(
 		row: TableRow<RowType>,
 		filter: Filter<RowType>,
 	): boolean {
-		if (filter.column.field === "SELECT") return true;
-
 		const cellValue = row[filter.column.field];
 
 		switch (filter.column.dataType) {
@@ -688,10 +687,10 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 	);
 
 	return (
-		<div className="min-w-200 max-w-200 text-slate-700">
-			<div className="border border-slate-300 rounded-sm bg-white overflow-hidden">
+		<div className="min-w-100 max-w-full w-fit  text-text">
+			<div className="border border-border rounded-sm bg-main overflow-hidden">
 				{/* Grid Header */}
-				<div className="flex items-center justify-between h-12 min-w-fit w-full border-b border-slate-300 px-2">
+				<div className="flex items-center justify-between h-12 min-w-fit w-full border-b border-border px-2">
 					<p className="font-semibold">{props.title}</p>
 
 					{/* Grid Optionen */}
@@ -745,7 +744,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					{/* Gepinnte Spalten */}
 					{pinnedCols.length > 0 && (
 						<div
-							className={`sticky left-0 top-0 z-1 flex bg-white border-r border-slate-300 w-fit transition-shadow duration-300 ${tableBodyIsScrolled ? "shadow-[0_0px_15px_rgba(0,0,0,0.15)]" : ""}`}
+							className={`sticky left-0 top-0 z-1 flex bg-main border-r border-border w-fit transition-shadow duration-300 ${tableBodyIsScrolled ? "shadow-[0_0px_15px_rgba(0,0,0,0.15)]" : ""}`}
 						>
 							{pinnedCols.map((column, index) => (
 								<TableColumn<RowType>
@@ -785,7 +784,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 				</div>
 
 				{/* Grid Footer */}
-				<div className="flex items-center justify-between gap-x5 h-12 min-w-fit w-full border-t border-slate-300 px-2">
+				<div className="flex items-center justify-between gap-x5 h-12 min-w-fit w-full border-t border-border px-2">
 					<InfoBar
 						rowsAmount={filteredRows.length}
 						selectedPage={state.selectedPage}

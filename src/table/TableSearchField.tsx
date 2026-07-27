@@ -1,4 +1,4 @@
-import { SearchIcon, XCircleIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import IconButton from "./IconButton";
 import type { TableAction } from "../types";
@@ -46,7 +46,7 @@ function TableSearchField<RowType>({
 
 			<div
 				ref={searchFieldRef}
-				className={`${expanded ? "max-w-50 w-full opacity-100 px-2" : "max-w-0 w-full opacity-0 px-0 pointer-events-none"} min-w-7.5 transition-all rounded-sm border border-slate-300 h-8.5 flex gap-x-2 items-center`}
+				className={`${expanded ? "max-w-50 w-full opacity-100 px-2" : "max-w-0 w-full opacity-0 px-0 pointer-events-none"} min-w-7.5 transition-all rounded-sm border border-border bg-main h-8.5 flex gap-x-2 items-center`}
 			>
 				<SearchIcon
 					size={18}
@@ -65,20 +65,15 @@ function TableSearchField<RowType>({
 					}
 				></input>
 				{props.searchQuery && (
-					<div
-						className="p-1 rounded-full hover:bg-slate-100 cursor-pointer"
+					<IconButton
+						icon="x-circle"
 						onClick={() =>
 							props.dispatch({
 								type: "SEARCH_QUERY_SET",
 								payload: { searchQuery: "" },
 							})
 						}
-					>
-						<XCircleIcon
-							size={18}
-							className="min-w-4.5"
-						></XCircleIcon>
-					</div>
+					></IconButton>
 				)}
 			</div>
 		</div>

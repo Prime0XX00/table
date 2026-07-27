@@ -1,7 +1,7 @@
 import React from "react";
 
 const DividerX = () => {
-	return <div className="w-px h-1/2 bg-slate-200 rounded-sm"></div>;
+	return <div className="w-px h-1/2 bg-border rounded-sm"></div>;
 };
 
 export default React.memo(DividerX);

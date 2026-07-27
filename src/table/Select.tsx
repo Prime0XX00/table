@@ -2,6 +2,7 @@ import { ChevronDownIcon } from "lucide-react";
 import Popover from "./Popover";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import React from "react";
+import Checkbox from "./Checkbox";
 
 interface SelectProps {
 	options: SelectOption[];
@@ -38,7 +39,7 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 
 	const trigger = useMemo(
 		() => (
-			<div className="h-8.5 min-w-16 w-fit rounded-sm border border-slate-300 hover:bg-slate-100 cursor-pointer flex items-center gap-x-2 justify-between px-2">
+			<div className="h-8.5 min-w-16 w-fit rounded-sm border border-border hover:bg-main-hover bg-main cursor-pointer flex items-center gap-x-2 justify-between px-2">
 				<span>
 					{selectedOption ? selectedOption.display : "Auswählen..."}
 				</span>
@@ -53,10 +54,17 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 			props.options.map((option, index) => (
 				<div
 					key={`option-${index}`}
-					className={`${option.value == selectedOption.value ? "bg-blue-600 text-white" : "hover:bg-slate-100"} cursor-pointer px-2 h-8.5 flex items-center justify-center`}
-					onClick={() => onChange(option)}
+					className={`${
+						option.value == selectedOption.value
+							? "bg-accent/10 hover:bg-accent/15"
+							: "hover:bg-main-hover"
+					} h-8.5 flex gap-x-2 px-2 items-center`}
 				>
-					{option.display}
+					<Checkbox
+						checked={option.value == selectedOption.value}
+						onChange={() => onChange(option)}
+					></Checkbox>
+					<span>{option.display}</span>
 				</div>
 			)),
 		[props.options, selectedOption],
@@ -64,7 +72,7 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 
 	return (
 		<Popover trigger={trigger}>
-			<div className="flex flex-col min-w-15.5">{options}</div>
+			<div className="flex flex-col min-w-20">{options}</div>
 		</Popover>
 	);
 };
