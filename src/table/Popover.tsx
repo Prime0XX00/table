@@ -37,15 +37,11 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 	const popoverRef = useRef<HTMLDivElement>(null);
 	const descendantNodes = useRef<Set<HTMLElement>>(new Set());
 
-	// Vom übergeordneten Popover (falls vorhanden) bereitgestellter Context
 	const parentContext = useContext(PopoverNestingContext);
 
 	function toggle() {
 		setVisible((prev) => !prev);
 	}
-
-	// Registriert ein Nachfahren-DOM-Element bei diesem Popover UND
-	// reicht die Registrierung an alle weiteren Vorfahren weiter
 	const registerDescendant = useCallback(
 		(el: HTMLElement) => {
 			descendantNodes.current.add(el);
@@ -59,8 +55,6 @@ const Popover: React.FC<PopoverProps> = ({ ...props }) => {
 		[parentContext],
 	);
 
-	// Sobald dieses Popover sichtbar ist, meldet es seinen eigenen
-	// (portalten) Content-Knoten beim Elternteil an
 	useEffect(() => {
 		if (!visible || !popoverRef.current || !parentContext) return;
 		return parentContext.registerDescendant(popoverRef.current);

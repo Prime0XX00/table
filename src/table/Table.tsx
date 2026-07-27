@@ -70,8 +70,8 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		selectedPage: 0,
 		rowsPerPage: Number(rowsPerPageOptions[0].value),
 		sorting: {
-			column: columns[0],
-			direction: "asc",
+			column: undefined,
+			direction: undefined,
 		},
 		columns: initalColumnStates,
 		searchQuery: "",
@@ -111,7 +111,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 				// Wenn neues Feld ausgewählt wird
 				// Da nur ein Richtungs-State für die gesamte Tabelle existiert, wird sobald die Spalte gewechselt wird
 				// der State zurück auf ASC gesetzt
-				if (state.sorting.column.field != column.field) {
+				if (state.sorting.column?.field != column.field) {
 					return {
 						...state,
 						sorting: {
@@ -143,6 +143,54 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 							},
 						};
 				}
+			}
+
+			case "SORT_ASC": {
+				const column = action.payload.column;
+
+				// Checken, ob die Spalte überhaupt sortiert werden kann.
+				if (!column.isSortable) return state;
+
+				return {
+					...state,
+					sorting: {
+						...state.sorting,
+						column: column,
+						direction: "asc",
+					},
+				};
+			}
+
+			case "SORT_DESC": {
+				const column = action.payload.column;
+
+				// Checken, ob die Spalte überhaupt sortiert werden kann.
+				if (!column.isSortable) return state;
+
+				return {
+					...state,
+					sorting: {
+						...state.sorting,
+						column: column,
+						direction: "desc",
+					},
+				};
+			}
+
+			case "SORT_REMOVE": {
+				const column = action.payload.column;
+
+				// Checken, ob die Spalte überhaupt sortiert werden kann.
+				if (!column.isSortable) return state;
+
+				return {
+					...state,
+					sorting: {
+						...state.sorting,
+						column: undefined,
+						direction: undefined,
+					},
+				};
 			}
 
 			// Erste Seite auswählen
@@ -483,18 +531,24 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 
 	// Sortierung anhand der ausgewählten Spalte und Richtung
 	const sortedRows = useMemo(() => {
+		if (
+			state.sorting.column == undefined ||
+			state.sorting.direction == undefined
+		)
+			return [...filteredRows];
+
 		if (state.sorting.column.field === "SELECT") return [...filteredRows];
 
 		if (!state.columns.get(state.sorting.column.field)?.visible)
 			return [...filteredRows];
 
+		const col = state.sorting.column as Column<RowType, keyof RowType>;
+
 		switch (state.sorting.column.dataType) {
 			case "number": {
 				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
-					if (state.sorting.column.field === "SELECT") return 1;
-
-					const valueA = Number(rowA[state.sorting.column.field]);
-					const valueB = Number(rowB[state.sorting.column.field]);
+					const valueA = Number(rowA[col.field]);
+					const valueB = Number(rowB[col.field]);
 
 					return state.sorting.direction == "asc"
 						? valueA - valueB
@@ -504,10 +558,8 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 			}
 			case "string": {
 				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
-					if (state.sorting.column.field === "SELECT") return 1;
-
-					const valueA = String(rowA[state.sorting.column.field]);
-					const valueB = String(rowB[state.sorting.column.field]);
+					const valueA = String(rowA[col.field]);
+					const valueB = String(rowB[col.field]);
 
 					return state.sorting.direction == "asc"
 						? valueA.localeCompare(valueB)
@@ -515,6 +567,17 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 				});
 				return newRows;
 			}
+			case "boolean":
+				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
+					const valueA = Number(rowA[col.field]);
+					const valueB = Number(rowB[col.field]);
+
+					return state.sorting.direction == "asc"
+						? valueA - valueB
+						: valueB - valueA;
+				});
+				return newRows;
+
 			default:
 				return [...filteredRows];
 		}

@@ -60,18 +60,18 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 
 				{(props.column.isSortable || props.column.hasOptions) && (
 					<div
-						className={`flex ${props.column.isSortable ? "justify-between" : "justify-end"} items-center gap-x-1 mr-1 ${props.column.field !== props.sorting.column.field ? "not-group-hover:w-0 not-group-hover:pointer-events-none" : ""} `}
+						className={`flex justify-end items-center gap-x-1 mr-1 ${props.column.field !== props.sorting.column?.field ? "not-group-hover:w-0 not-group-hover:pointer-events-none" : ""} `}
 					>
 						{props.column.isSortable && (
 							<IconButton
 								icon={
-									props.sorting.column.field ==
+									props.sorting.column?.field ==
 										props.column.field &&
 									props.sorting.direction == "desc"
 										? "move-down"
 										: "move-up"
 								}
-								className={`${props.sorting.column.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
+								className={`${props.sorting.column?.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
 								onClick={() =>
 									props.dispatch({
 										type: "SORT_TOGGLE",

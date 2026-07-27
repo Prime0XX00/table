@@ -30,8 +30,8 @@ export type TableRow<RowType> = RowType & {
 };
 
 export interface SortState<RowType> {
-	column: Column<RowType>;
-	direction: "asc" | "desc";
+	column: Column<RowType> | undefined;
+	direction: "asc" | "desc" | undefined;
 }
 
 export interface TableState<
@@ -102,6 +102,9 @@ export type TableAction<
 > =
 	| { type: "STATE_RESET" }
 	| { type: "SORT_TOGGLE"; payload: { column: Column<RowType> } }
+	| { type: "SORT_ASC"; payload: { column: Column<RowType> } }
+	| { type: "SORT_DESC"; payload: { column: Column<RowType> } }
+	| { type: "SORT_REMOVE"; payload: { column: Column<RowType> } }
 	| { type: "PAGE_SET_FIRST" }
 	| { type: "PAGE_SET_PREV" }
 	| { type: "PAGE_SET_NEXT"; payload: { pageAmount: number } }
