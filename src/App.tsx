@@ -30,8 +30,8 @@ const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 
 function App() {
 	return (
-		<div className="p-10 flex flex-col gap-y-10 min-h-screen">
-			<div className="min-w-100 w-fit">
+		<div className="py-10 flex flex-col gap-y-10 min-h-screen">
+			<div className="min-w-100 w-fit px-10 max-w-screen">
 				<Table<Article>
 					title="Artikeldaten"
 					rows={rows}

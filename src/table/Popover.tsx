@@ -35,9 +35,6 @@ interface PopoverOwnProps {
 	children: ReactElement;
 }
 
-// Zusätzliche Props (Record<string, any>) werden zugelassen, damit eine
-// äußere Komponente (z.B. Tooltip), die dieses Popover als ihren trigger
-// verwendet, per cloneElement eigene Event-Handler durchreichen kann.
 type PopoverProps = PopoverOwnProps & Record<string, any>;
 
 const Popover = forwardRef<HTMLElement, PopoverProps>(
@@ -56,9 +53,6 @@ const Popover = forwardRef<HTMLElement, PopoverProps>(
 
 		const parentContext = useContext(PopoverNestingContext);
 
-		// Wenn dieses Popover selbst als trigger einer äußeren Komponente
-		// (z.B. Tooltip) verwendet wird, muss deren ref auf den tatsächlichen
-		// DOM-Knoten zeigen statt ins Leere zu laufen.
 		useImperativeHandle(
 			forwardedRef,
 			() => triggerRef.current as HTMLElement,

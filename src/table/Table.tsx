@@ -656,6 +656,33 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		[dispatch],
 	);
 
+	const exportData = useCallback(() => {
+		const exportedRows: any[] = [];
+
+		const exportedCols = pinnedCols.concat(visibleCols);
+
+		filteredRows.forEach((row) => {
+			var newRow: any = {};
+
+			exportedCols.forEach((column) => {
+				const cellValue = row[column.field];
+				newRow[column.field] = cellValue;
+			});
+
+			exportedRows.push(newRow);
+		});
+
+		var a = window.document.createElement("a");
+		a.href =
+			"data:text/json;charset=utf-8," +
+			encodeURIComponent(JSON.stringify(exportedRows));
+		a.download = "export.json";
+
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}, [filteredRows, visibleCols]);
+
 	return (
 		<div className="w-full max-w-full text-text">
 			<div className="border border-border rounded-sm bg-main overflow-hidden">
@@ -690,7 +717,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 
 						<DividerX></DividerX>
 
-						<ExportPopover></ExportPopover>
+						<ExportPopover exportData={exportData}></ExportPopover>
 
 						<DividerX></DividerX>
 
