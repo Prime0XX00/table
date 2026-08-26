@@ -25,7 +25,7 @@ function ColumnActionsPopover<RowType>({
 			trigger={
 				<IconButton
 					icon="ellipsis-vertical"
-					className="group-hover:opacity-100 opacity-0"
+					className={`${props.sorting.column?.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
 				></IconButton>
 			}
 		>
