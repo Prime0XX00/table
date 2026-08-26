@@ -2,6 +2,7 @@ import React from "react";
 import type { TableAction } from "../types";
 
 import IconButton from "./IconButton";
+import Tooltip from "./Tooltip";
 
 interface PaginationProps<RowType> {
 	pageAmount: number;
@@ -13,24 +14,36 @@ interface PaginationProps<RowType> {
 function Pagination<RowType>({ ...props }: PaginationProps<RowType>) {
 	return (
 		<div className="flex gap-x-2 items-center">
-			<IconButton
-				icon="chevrons-left"
-				disabled={props.selectedPage <= 0}
-				onClick={() =>
-					props.dispatch({
-						type: "PAGE_SET_FIRST",
-					})
+			<Tooltip
+				trigger={
+					<IconButton
+						icon="chevrons-left"
+						disabled={props.selectedPage <= 0}
+						onClick={() =>
+							props.dispatch({
+								type: "PAGE_SET_FIRST",
+							})
+						}
+					></IconButton>
 				}
-			></IconButton>
-			<IconButton
-				icon="chevron-left"
-				disabled={props.selectedPage <= 0}
-				onClick={() =>
-					props.dispatch({
-						type: "PAGE_SET_PREV",
-					})
+			>
+				Zur ersten Seite
+			</Tooltip>
+			<Tooltip
+				trigger={
+					<IconButton
+						icon="chevron-left"
+						disabled={props.selectedPage <= 0}
+						onClick={() =>
+							props.dispatch({
+								type: "PAGE_SET_PREV",
+							})
+						}
+					></IconButton>
 				}
-			></IconButton>
+			>
+				Zur vorherigen Seite
+			</Tooltip>
 			<p>
 				{props.pageAmount == 0 ? (
 					<span>{0 + " / " + 0}</span>
@@ -40,26 +53,38 @@ function Pagination<RowType>({ ...props }: PaginationProps<RowType>) {
 					</span>
 				)}
 			</p>
-			<IconButton
-				icon="chevron-right"
-				disabled={props.selectedPage >= props.pageAmount - 1}
-				onClick={() =>
-					props.dispatch({
-						type: "PAGE_SET_NEXT",
-						payload: { pageAmount: props.pageAmount },
-					})
+			<Tooltip
+				trigger={
+					<IconButton
+						icon="chevron-right"
+						disabled={props.selectedPage >= props.pageAmount - 1}
+						onClick={() =>
+							props.dispatch({
+								type: "PAGE_SET_NEXT",
+								payload: { pageAmount: props.pageAmount },
+							})
+						}
+					></IconButton>
 				}
-			></IconButton>
-			<IconButton
-				icon="chevrons-right"
-				disabled={props.selectedPage >= props.pageAmount - 1}
-				onClick={() =>
-					props.dispatch({
-						type: "PAGE_SET_LAST",
-						payload: { pageAmount: props.pageAmount },
-					})
+			>
+				Zur nächsten Seite
+			</Tooltip>
+			<Tooltip
+				trigger={
+					<IconButton
+						icon="chevrons-right"
+						disabled={props.selectedPage >= props.pageAmount - 1}
+						onClick={() =>
+							props.dispatch({
+								type: "PAGE_SET_LAST",
+								payload: { pageAmount: props.pageAmount },
+							})
+						}
+					></IconButton>
 				}
-			></IconButton>
+			>
+				Zur letzten Seite
+			</Tooltip>
 		</div>
 	);
 }

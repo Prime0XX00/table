@@ -31,61 +31,63 @@ const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
 function App() {
 	return (
 		<div className="p-10 flex flex-col gap-y-10 min-h-screen">
-			<Table<Article>
-				title="Artikeldaten"
-				rows={rows}
-				columns={[
-					{
-						field: "id",
-						title: "ID",
-						dataType: "number",
-						isPinned: true,
-					},
-					{
-						field: "data",
-						title: "Daten",
-						dataType: "number",
-					},
-					{
-						field: "status",
-						title: "Status",
-						dataType: "string",
-					},
-					{
-						field: "percent",
-						title: "Fortschritt",
-						dataType: "number",
-						initialWidth: 250,
-						render: (value) => (
-							<div className="relative bg-main-hover rounded-full h-2 w-full overflow-hidden">
-								<div
-									className="absolute left-0 top-0 h-full bg-accent"
-									style={{ width: value + "%" }}
-								></div>
-							</div>
-						),
-					},
-					{
-						field: "active",
-						title: "Aktiv",
-						dataType: "boolean",
-						render: (value) => (
-							<Checkbox
-								checked={Boolean(value)}
-								readonly
-							></Checkbox>
-						),
-					},
-					{
-						field: "date",
-						title: "Datum",
-						dataType: "date",
-						render: (rawDate) => {
-							return rawDate.toLocaleString();
+			<div className="min-w-100 w-fit">
+				<Table<Article>
+					title="Artikeldaten"
+					rows={rows}
+					columns={[
+						{
+							field: "id",
+							title: "ID",
+							dataType: "number",
+							isPinned: true,
 						},
-					},
-				]}
-			></Table>
+						{
+							field: "data",
+							title: "Daten",
+							dataType: "number",
+						},
+						{
+							field: "status",
+							title: "Status",
+							dataType: "string",
+						},
+						{
+							field: "percent",
+							title: "Fortschritt",
+							dataType: "number",
+							initialWidth: 250,
+							render: (value) => (
+								<div className="relative bg-main-hover rounded-full h-2 w-full overflow-hidden">
+									<div
+										className="absolute left-0 top-0 h-full bg-accent"
+										style={{ width: value + "%" }}
+									></div>
+								</div>
+							),
+						},
+						{
+							field: "active",
+							title: "Aktiv",
+							dataType: "boolean",
+							render: (value) => (
+								<Checkbox
+									checked={Boolean(value)}
+									readonly
+								></Checkbox>
+							),
+						},
+						{
+							field: "date",
+							title: "Datum",
+							dataType: "date",
+							render: (rawDate) => {
+								return rawDate.toLocaleString();
+							},
+						},
+					]}
+				></Table>
+			</div>
 		</div>
 	);
 }

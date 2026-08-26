@@ -3,6 +3,7 @@ import IconButton from "../IconButton";
 import Checkbox from "../Checkbox";
 import type { Column, ColumnState, TableAction } from "../../types";
 import React from "react";
+import Tooltip from "../Tooltip";
 
 interface ColumnsSettingsPopoverProps<RowType> {
 	columns: Column<RowType>[];
@@ -14,35 +15,45 @@ function ColumnsSettingsPopover<RowType>({
 	...props
 }: ColumnsSettingsPopoverProps<RowType>) {
 	return (
-		<Popover trigger={<IconButton icon="columns-3-cog"></IconButton>}>
-			<div className="flex flex-col">
-				{props.columns.map((column, index) => (
-					<div
-						key={`col-toggle-${index}`}
-						className={`${
-							props.columnStates.get(column.field)?.visible
-								? "bg-accent/10 hover:bg-accent/15"
-								: "hover:bg-main-hover"
-						} h-8.5 flex gap-x-2 px-2 items-center`}
-					>
-						<Checkbox
-							checked={
-								props.columnStates.get(column.field)?.visible
-							}
-							onChange={() =>
-								props.dispatch({
-									type: "COL_TOGGLE_VISIBILITY",
-									payload: {
-										field: column.field,
-									},
-								})
-							}
-						></Checkbox>
-						<span>{column.title}</span>
+		<Tooltip
+			trigger={
+				<Popover
+					trigger={<IconButton icon="columns-3-cog"></IconButton>}
+				>
+					<div className="flex flex-col">
+						{props.columns.map((column, index) => (
+							<div
+								key={`col-toggle-${index}`}
+								className={`${
+									props.columnStates.get(column.field)
+										?.visible
+										? "bg-accent/10 hover:bg-accent/15"
+										: "hover:bg-main-hover"
+								} h-8.5 flex gap-x-2 px-2 items-center`}
+							>
+								<Checkbox
+									checked={
+										props.columnStates.get(column.field)
+											?.visible
+									}
+									onChange={() =>
+										props.dispatch({
+											type: "COL_TOGGLE_VISIBILITY",
+											payload: {
+												field: column.field,
+											},
+										})
+									}
+								></Checkbox>
+								<span>{column.title}</span>
+							</div>
+						))}
 					</div>
-				))}
-			</div>
-		</Popover>
+				</Popover>
+			}
+		>
+			Spalten ausblenden
+		</Tooltip>
 	);
 }
 

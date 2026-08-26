@@ -17,9 +17,10 @@ import FilterPopover from "./popovers/FilterPopover";
 import ColumnsSettingsPopover from "./popovers/ColumnsSettingsPopover";
 import DividerX from "./DividerX";
 import TableColumn from "./TableColumn";
-import ExportPopover from "./popovers/ExportPopover";
 import EmptyTableColumn from "./EmptyTableColumn";
 import { FILTER_OPERATORS, initialColWidth } from "../consts";
+import Tooltip from "./Tooltip";
+import ExportPopover from "./popovers/ExportPopover";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -656,7 +657,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 	);
 
 	return (
-		<div className="min-w-100 max-w-full w-fit  text-text">
+		<div className="w-full max-w-full text-text">
 			<div className="border border-border rounded-sm bg-main overflow-hidden">
 				{/* Grid Header */}
 				<div className="flex items-center justify-between h-12 min-w-fit w-full border-b border-border px-2">
@@ -676,10 +677,16 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 							columns={columns}
 						></ColumnsSettingsPopover>
 
-						<IconButton
-							icon="refresh-ccw-dot"
-							onClick={resetState}
-						></IconButton>
+						<Tooltip
+							trigger={
+								<IconButton
+									icon="refresh-ccw-dot"
+									onClick={resetState}
+								></IconButton>
+							}
+						>
+							Zurücksetzen
+						</Tooltip>
 
 						<DividerX></DividerX>
 

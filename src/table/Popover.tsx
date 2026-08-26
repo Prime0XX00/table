@@ -1,11 +1,15 @@
 import React, {
 	createContext,
+	forwardRef,
 	useCallback,
 	useContext,
 	useEffect,
+	useImperativeHandle,
 	useMemo,
 	useRef,
 	useState,
+	type FocusEvent,
+	type MouseEvent,
 	type ReactElement,
 } from "react";
 import { createPortal } from "react-dom";
@@ -18,113 +22,162 @@ const PopoverNestingContext = createContext<PopoverNestingContextValue | null>(
 	null,
 );
 
-interface PopoverProps {
-	trigger: ReactElement<{
-		onClick?: () => void;
-		ref?: React.Ref<HTMLElement>;
-	}>;
+function mergeHandlers<E>(
+	...handlers: Array<((e: E) => void) | undefined>
+): (e: E) => void {
+	return (e: E) => {
+		for (const handler of handlers) handler?.(e);
+	};
+}
+
+interface PopoverOwnProps {
+	trigger: ReactElement<Record<string, any>>;
 	children: ReactElement;
 }
 
-const Popover: React.FC<PopoverProps> = ({ ...props }) => {
-	const [position, setPosition] = useState<{ left: number; top: number }>({
-		left: 0,
-		top: 0,
-	});
-	const [visible, setVisible] = useState(false);
+// Zusätzliche Props (Record<string, any>) werden zugelassen, damit eine
+// äußere Komponente (z.B. Tooltip), die dieses Popover als ihren trigger
+// verwendet, per cloneElement eigene Event-Handler durchreichen kann.
+type PopoverProps = PopoverOwnProps & Record<string, any>;
 
-	const triggerRef = useRef<HTMLElement>(null);
-	const popoverRef = useRef<HTMLDivElement>(null);
-	const descendantNodes = useRef<Set<HTMLElement>>(new Set());
+const Popover = forwardRef<HTMLElement, PopoverProps>(
+	({ trigger, children, ...rest }, forwardedRef) => {
+		const [position, setPosition] = useState<{ left: number; top: number }>(
+			{
+				left: 0,
+				top: 0,
+			},
+		);
+		const [visible, setVisible] = useState(false);
 
-	const parentContext = useContext(PopoverNestingContext);
+		const triggerRef = useRef<HTMLElement>(null);
+		const popoverRef = useRef<HTMLDivElement>(null);
+		const descendantNodes = useRef<Set<HTMLElement>>(new Set());
 
-	function toggle() {
-		setVisible((prev) => !prev);
-	}
-	const registerDescendant = useCallback(
-		(el: HTMLElement) => {
-			descendantNodes.current.add(el);
-			const unregisterFromParent = parentContext?.registerDescendant(el);
+		const parentContext = useContext(PopoverNestingContext);
 
-			return () => {
-				descendantNodes.current.delete(el);
-				unregisterFromParent?.();
+		// Wenn dieses Popover selbst als trigger einer äußeren Komponente
+		// (z.B. Tooltip) verwendet wird, muss deren ref auf den tatsächlichen
+		// DOM-Knoten zeigen statt ins Leere zu laufen.
+		useImperativeHandle(
+			forwardedRef,
+			() => triggerRef.current as HTMLElement,
+		);
+
+		function toggle() {
+			setVisible((prev) => !prev);
+		}
+
+		const registerDescendant = useCallback(
+			(el: HTMLElement) => {
+				descendantNodes.current.add(el);
+				const unregisterFromParent =
+					parentContext?.registerDescendant(el);
+
+				return () => {
+					descendantNodes.current.delete(el);
+					unregisterFromParent?.();
+				};
+			},
+			[parentContext],
+		);
+
+		useEffect(() => {
+			if (!visible || !popoverRef.current || !parentContext) return;
+			return parentContext.registerDescendant(popoverRef.current);
+		}, [visible, parentContext]);
+
+		useEffect(() => {
+			if (!visible || !triggerRef.current || !popoverRef.current) return;
+
+			const triggerRect = triggerRef.current.getBoundingClientRect();
+			const popoverRect = popoverRef.current.getBoundingClientRect();
+			setPosition({
+				left: triggerRect.left + triggerRect.width - popoverRect.width,
+				top: triggerRect.top + triggerRect.height + 4,
+			});
+		}, [visible]);
+
+		useEffect(() => {
+			const handleClickOutside = (e: globalThis.MouseEvent) => {
+				if (!triggerRef.current) return;
+				if (!popoverRef.current) return;
+				if (!visible) return;
+
+				const target = e.target as Node;
+
+				const isInsideTrigger = triggerRef.current.contains(target);
+				const isInsideContent = popoverRef.current.contains(target);
+				const isInsideDescendant = Array.from(
+					descendantNodes.current,
+				).some((node) => node.contains(target));
+
+				if (
+					!isInsideTrigger &&
+					!isInsideContent &&
+					!isInsideDescendant
+				) {
+					setVisible(false);
+				}
 			};
-		},
-		[parentContext],
-	);
 
-	useEffect(() => {
-		if (!visible || !popoverRef.current || !parentContext) return;
-		return parentContext.registerDescendant(popoverRef.current);
-	}, [visible, parentContext]);
+			document.addEventListener("mousedown", handleClickOutside);
+			return () => {
+				document.removeEventListener("mousedown", handleClickOutside);
+			};
+		}, [visible]);
 
-	useEffect(() => {
-		if (!visible || !triggerRef.current || !popoverRef.current) return;
+		const nestingContextValue = useMemo<PopoverNestingContextValue>(
+			() => ({ registerDescendant }),
+			[registerDescendant],
+		);
 
-		const triggerRect = triggerRef.current.getBoundingClientRect();
-		const popoverRect = popoverRef.current.getBoundingClientRect();
-		setPosition({
-			left: triggerRect.left + triggerRect.width - popoverRect.width,
-			top: triggerRect.top + triggerRect.height + 4,
-		});
-	}, [visible]);
+		return (
+			<>
+				{React.cloneElement(trigger, {
+					...rest,
+					ref: triggerRef,
+					onClick: mergeHandlers<MouseEvent>(
+						trigger.props.onClick,
+						rest.onClick,
+						toggle,
+					),
+					onMouseEnter: mergeHandlers<MouseEvent>(
+						trigger.props.onMouseEnter,
+						rest.onMouseEnter,
+					),
+					onMouseLeave: mergeHandlers<MouseEvent>(
+						trigger.props.onMouseLeave,
+						rest.onMouseLeave,
+					),
+					onFocus: mergeHandlers<FocusEvent>(
+						trigger.props.onFocus,
+						rest.onFocus,
+					),
+					onBlur: mergeHandlers<FocusEvent>(
+						trigger.props.onBlur,
+						rest.onBlur,
+					),
+				})}
 
-	useEffect(() => {
-		const handleClickOutside = (e: MouseEvent) => {
-			if (!triggerRef.current) return;
-			if (!popoverRef.current) return;
-			if (!visible) return;
-
-			const target = e.target as Node;
-
-			const isInsideTrigger = triggerRef.current.contains(target);
-			const isInsideContent = popoverRef.current.contains(target);
-			const isInsideDescendant = Array.from(descendantNodes.current).some(
-				(node) => node.contains(target),
-			);
-
-			if (!isInsideTrigger && !isInsideContent && !isInsideDescendant) {
-				setVisible(false);
-			}
-		};
-
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, [visible, props.trigger, props.children]);
-
-	const nestingContextValue = useMemo<PopoverNestingContextValue>(
-		() => ({ registerDescendant }),
-		[registerDescendant],
-	);
-
-	return (
-		<>
-			{React.cloneElement(props.trigger, {
-				ref: triggerRef,
-				onClick: toggle,
-			})}
-
-			{visible &&
-				createPortal(
-					<div
-						ref={popoverRef}
-						className="z-100 border border-border py-2 rounded-sm bg-main text-text absolute shadow-lg"
-						style={{ left: position.left, top: position.top }}
-					>
-						<PopoverNestingContext.Provider
-							value={nestingContextValue}
+				{visible &&
+					createPortal(
+						<div
+							ref={popoverRef}
+							className="z-100 border border-border py-2 rounded-sm bg-main text-text absolute shadow-lg"
+							style={{ left: position.left, top: position.top }}
 						>
-							{props.children}
-						</PopoverNestingContext.Provider>
-					</div>,
-					document.body,
-				)}
-		</>
-	);
-};
+							<PopoverNestingContext.Provider
+								value={nestingContextValue}
+							>
+								{children}
+							</PopoverNestingContext.Provider>
+						</div>,
+						document.body,
+					)}
+			</>
+		);
+	},
+);
 
 export default React.memo(Popover);

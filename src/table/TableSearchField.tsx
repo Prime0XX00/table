@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import IconButton from "./IconButton";
 import type { TableAction } from "../types";
 import React from "react";
+import Tooltip from "./Tooltip";
 
 interface TableSearchFieldProps<RowType> {
 	searchQuery: string;
@@ -38,11 +39,17 @@ function TableSearchField<RowType>({
 
 	return (
 		<div className="relative flex items-center">
-			<IconButton
-				className={`${expanded ? " opacity-0 pointer-events-none" : "opacity-100"} transition-all absolute `}
-				icon="search"
-				onClick={() => setExpanded((prev) => !prev)}
-			></IconButton>
+			<Tooltip
+				trigger={
+					<IconButton
+						className={`${expanded ? " opacity-0 pointer-events-none" : "opacity-100"} transition-all absolute `}
+						icon="search"
+						onClick={() => setExpanded((prev) => !prev)}
+					></IconButton>
+				}
+			>
+				Suchen
+			</Tooltip>
 
 			<div
 				ref={searchFieldRef}
@@ -52,6 +59,7 @@ function TableSearchField<RowType>({
 					size={18}
 					className="min-w-4.5"
 				></SearchIcon>
+
 				<input
 					name="searchQuery"
 					placeholder="Suchen..."
