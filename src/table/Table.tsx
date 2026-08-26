@@ -632,37 +632,6 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		});
 	}, [filteredRows, state.rowsPerPage]);
 
-	// Auswählen der Zeilen
-	/* function toggleRow(row: TableRow<RowType>) {
-		if (selectedRowIds.has(row.__rowId))
-			setSelectedRowIds((prev) => {
-				prev.delete(row.__rowId);
-				return new Set<number>(prev);
-			});
-		else
-			setSelectedRowIds((prev) => new Set<number>(prev.add(row.__rowId)));
-	} */
-
-	// Es werden alle Reihen ausgewählt, nach denen momentan gefiltert wird
-	/* function toggleAllRows() {
-		if (
-			selectedRowIds.size >= 0 &&
-			selectedRowIds.size < filteredRows.length
-		) {
-			const newSet = new Set<number>();
-			filteredRows.forEach((row) => newSet.add(row.__rowId));
-			setSelectedRowIds(new Set<number>(newSet));
-		} else {
-			setSelectedRowIds(new Set<number>());
-		}
-	} */
-
-	/* const checked = useMemo(() => {
-		if (selectedRowIds.size == 0) return false;
-		else if (selectedRowIds.size == filteredRows.length) return true;
-		else return undefined;
-	}, [selectedRowIds, rows, state.searchQuery, state.filters]); */
-
 	const [tableBodyIsScrolled, setTableBodyIsScrolled] = useState(false);
 
 	const onTableBodyScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {

@@ -43,7 +43,10 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 				></HeaderCell>
 			</div>
 
-			<div>
+			{/* Wenn leere Zeilen  generiert werden, dann wird der eine Border zwischen Inhalt und Leere gezogen */}
+			<div
+				className={`${props.paginatedRows.length == props.rowsPerPage ? "" : "border-b border-border"}`}
+			>
 				{/* Body Zellen */}
 				{props.paginatedRows.map((row, rowIndex) => (
 					<div
