@@ -43,15 +43,12 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 				></HeaderCell>
 			</div>
 
-			{/* Wenn leere Zeilen  generiert werden, dann wird der eine Border zwischen Inhalt und Leere gezogen */}
-			<div
-				className={`${props.paginatedRows.length == props.rowsPerPage ? "" : "border-b border-border"}`}
-			>
+			<div>
 				{/* Body Zellen */}
 				{props.paginatedRows.map((row, rowIndex) => (
 					<div
 						key={`row-${rowIndex}-cell`}
-						className={`h-8.5 border-b border-border last:border-0 flex items-center`}
+						className={`${props.paginatedRows.length == props.rowsPerPage ? "last:border-0" : ""} h-8.5 border-b border-border flex items-center`}
 					>
 						<Cell
 							column={props.column}
@@ -60,6 +57,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 					</div>
 				))}
 			</div>
+
 			{/* 
                 Leere Zeilen, damit die Tabellenhöhe immer gleich bleibt.
                 Generiert diese, bis die Anzahl an Reihen pro Seite eingehalten wird.
