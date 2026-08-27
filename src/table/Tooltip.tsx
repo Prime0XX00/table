@@ -116,7 +116,7 @@ const Tooltip: React.FC<TooltipProps> = ({
 					<div
 						ref={tooltipRef}
 						role="tooltip"
-						className="z-100 py-1 px-2 rounded-sm bg-slate-900 text-slate-200 absolute shadow-lg text-sm pointer-events-none"
+						className="z-100 py-1 px-2 rounded-sm bg-slate-700 text-slate-200 absolute shadow-lg text-sm pointer-events-none"
 						style={{ left: position.left, top: position.top }}
 					>
 						{children}

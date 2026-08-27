@@ -54,7 +54,7 @@ export interface FilterState<RowType> {
 export interface Filter<RowType> {
 	column: Column<RowType>;
 	operator: FilterOperator;
-	value: string | number;
+	value: string | number | boolean | Date;
 }
 
 export type FilterOperator =

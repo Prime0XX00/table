@@ -5,25 +5,24 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 	onValueChange?: (value: string | number) => void;
 }
 
-const Input: React.FC<InputProps> = ({ ...props }) => {
+const Input: React.FC<InputProps> = ({ value, onValueChange, ...props }) => {
 	useEffect(() => {
-		setValue(props.value ? String(props.value) : "");
-	}, [props.value]);
+		setVal(value ? String(value) : "");
+	}, [value]);
 
-	const [value, setValue] = useState<string>(
-		props.value ? String(props.value) : "",
-	);
+	const [val, setVal] = useState<string>(value ? String(value) : "");
 
 	function onChange(value: string) {
-		setValue(value);
-		props.onValueChange?.(value);
+		setVal(value);
+		onValueChange?.(value);
 	}
 
 	return (
 		<input
-			className="h-8.5 min-w-16 w-fit rounded-sm border border-border bg-main flex items-center gap-x-2 justify-between px-2"
+			{...props}
+			className={`${props.className} h-8.5 min-w-16 w-fit rounded-sm border border-border bg-main flex items-center gap-x-2 justify-between px-2`}
 			onChange={(e) => onChange(e.target.value)}
-			value={value}
+			value={val}
 		/>
 	);
 };

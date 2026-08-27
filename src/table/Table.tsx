@@ -520,20 +520,11 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 				}
 			}
 			case "date": {
-				const [YYYY, MM, DD] = String(filter.value).split("-");
-				if (!YYYY || !MM || !DD) return true;
-
-				const dateFilterValue = new Date(
-					Number(YYYY),
-					Number(MM) - 1,
-					Number(DD),
-				);
-
 				switch (filter.operator) {
 					case FILTER_OPERATORS[filter.column.dataType].LT:
-						return cellValue <= dateFilterValue;
+						return cellValue <= filter.value;
 					case FILTER_OPERATORS[filter.column.dataType].GT:
-						return cellValue >= dateFilterValue;
+						return cellValue >= filter.value;
 					default:
 						return true;
 				}

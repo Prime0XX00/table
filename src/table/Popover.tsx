@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 
 interface PopoverNestingContextValue {
 	registerDescendant: (el: HTMLElement) => () => void;
+	close: () => void;
 }
 
 const PopoverNestingContext = createContext<PopoverNestingContextValue | null>(
@@ -121,9 +122,11 @@ const Popover = forwardRef<HTMLElement, PopoverProps>(
 			};
 		}, [visible]);
 
+		const close = useCallback(() => setVisible(false), []);
+
 		const nestingContextValue = useMemo<PopoverNestingContextValue>(
-			() => ({ registerDescendant }),
-			[registerDescendant],
+			() => ({ registerDescendant, close }),
+			[registerDescendant, close],
 		);
 
 		return (
@@ -173,5 +176,10 @@ const Popover = forwardRef<HTMLElement, PopoverProps>(
 		);
 	},
 );
+
+export function usePopoverClose(): (() => void) | undefined {
+	const context = useContext(PopoverNestingContext);
+	return context?.close;
+}
 
 export default React.memo(Popover);

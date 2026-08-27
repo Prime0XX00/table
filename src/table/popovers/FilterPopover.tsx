@@ -11,6 +11,7 @@ import Input from "../Input";
 import React from "react";
 import { FILTER_OPERATORS } from "../../consts";
 import Tooltip from "../Tooltip";
+import DatePicker from "../Datepicker";
 
 interface FilterPopoverProps<RowType> {
 	columns: Column<RowType>[];
@@ -122,7 +123,7 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 												display: "FALSCH",
 											},
 										]}
-										value={filter.value}
+										value={String(filter.value)}
 										onChange={(value) =>
 											props.dispatch({
 												type: "FILTER_CHANGE",
@@ -136,9 +137,29 @@ function FilterPopover<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 											})
 										}
 									></Select>
+								) : filter.column.dataType == "date" ? (
+									<DatePicker
+										value={
+											filter.value instanceof Date
+												? filter.value
+												: null
+										}
+										onChange={(value) =>
+											props.dispatch({
+												type: "FILTER_CHANGE",
+												payload: {
+													filter: {
+														...filter,
+														value: value,
+													},
+													index: index,
+												},
+											})
+										}
+									></DatePicker>
 								) : (
 									<Input
-										value={filter.value}
+										value={String(filter.value)}
 										onValueChange={(value) =>
 											props.dispatch({
 												type: "FILTER_CHANGE",
