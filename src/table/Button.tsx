@@ -9,7 +9,7 @@ const Button: React.FC<ButtonProps> = ({ ref, ...props }) => {
 		<button
 			{...props}
 			ref={ref}
-			className={`${props.className} disabled:opacity-disabled not-disabled:hover:bg-main-hover not-disabled:cursor-pointer h-8.5 p-1 rounded-md border border-border bg-main`}
+			className={`${props.className} disabled:opacity-disabled not-disabled:hover:bg-main-hover not-disabled:cursor-pointer h-element p-1 rounded-md border border-border bg-main`}
 		>
 			{props.children}
 		</button>

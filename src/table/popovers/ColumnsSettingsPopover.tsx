@@ -29,7 +29,7 @@ function ColumnsSettingsPopover<RowType>({
 										?.visible
 										? "bg-accent/10 hover:bg-accent/15"
 										: "hover:bg-main-hover"
-								} h-8.5 flex gap-x-2 px-2 items-center`}
+								} h-popover-row flex gap-x-2 px-2 items-center`}
 							>
 								<Checkbox
 									checked={

@@ -19,7 +19,7 @@ function PopoverContent({ ...props }: ExportPopoverProps) {
 	return (
 		<div className="flex flex-col min-w-20">
 			<div
-				className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
+				className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 				onClick={handleExportJSON}
 			>
 				<FileBracesIcon size={18}></FileBracesIcon>

@@ -19,7 +19,7 @@ const status = [
 	"Unbekannt",
 ];
 
-const rows: Article[] = Array.from({ length: 3456 }).map((_, index) => ({
+const rows: Article[] = Array.from({ length: 10000 }).map((_, index) => ({
 	id: index,
 	data: Number((100 * Math.random()).toFixed(2)),
 	percent: Number((100 * Math.random()).toFixed(2)),

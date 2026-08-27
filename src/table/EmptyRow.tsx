@@ -1,5 +1,5 @@
 const EmptyRow = () => {
-	return <div className={`h-8.5`}></div>;
+	return <div className={`h-table-row`}></div>;
 };
 
 export default EmptyRow;

@@ -18,7 +18,7 @@ function EmptyTableColumn({ ...props }: EmptyColumnProps) {
 					(_, rowIndex) => (
 						<div
 							key={`row-${rowIndex}-cell`}
-							className={`h-8.5 border-b border-border last:border-0 flex items-center`}
+							className={`h-element border-b border-border last:border-0 flex items-center`}
 						></div>
 					),
 				)}

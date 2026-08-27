@@ -7,6 +7,15 @@
 	--color-border: var(--color-slate-300);
 	--color-accent: var(--color-emerald-700);
 
+	--color-tooltip: var(--color-slate-700);
+	--color-tooltip-text: var(--color-slate-200);
+
+	--spacing-element: calc(var(--spacing) * 8.5);
+	--spacing-table-row: calc(var(--spacing) * 8.5);
+	--spacing-popover-row: calc(var(--spacing) * 8.5);
+
+	--spacing-min-cell-w: calc(var(--spacing) * 28);
+
 	--opacity-disabled: 50%;
 }
 

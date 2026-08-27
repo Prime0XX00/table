@@ -48,7 +48,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 				{props.paginatedRows.map((row, rowIndex) => (
 					<div
 						key={`row-${rowIndex}-cell`}
-						className={`${props.paginatedRows.length == props.rowsPerPage ? "last:border-0" : ""} h-8.5 border-b border-border flex items-center`}
+						className={`${props.paginatedRows.length == props.rowsPerPage ? "last:border-0" : ""} h-table-row border-b border-border flex items-center`}
 					>
 						<Cell
 							column={props.column}
@@ -70,7 +70,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 				))}
 
 			{/* Footer Zelle */}
-			<div className="h-12 flex items-center justify-between px-2 border-t border-border min-w-28 w-full"></div>
+			<div className="h-table-row flex items-center justify-between px-2 border-t border-border w-full min-w-min-cell-w"></div>
 		</div>
 	);
 }

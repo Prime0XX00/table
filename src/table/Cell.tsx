@@ -9,7 +9,7 @@ interface CellProps<RowType> {
 function Cell<RowType>({ ...props }: CellProps<RowType>) {
 	return (
 		<div
-			className={`px-2 overflow-hidden text-ellipsis min-w-28 w-full text-nowrap`}
+			className={`px-2 overflow-hidden text-ellipsis min-w-min-cell-w w-full text-nowrap`}
 		>
 			{props.row[props.column.field] == undefined
 				? ""

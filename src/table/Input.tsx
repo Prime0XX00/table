@@ -20,7 +20,7 @@ const Input: React.FC<InputProps> = ({ value, onValueChange, ...props }) => {
 	return (
 		<input
 			{...props}
-			className={`${props.className} h-8.5 min-w-16 w-fit rounded-sm border border-border bg-main flex items-center gap-x-2 justify-between px-2`}
+			className={`${props.className} h-element min-w-16 w-fit rounded-sm border border-border bg-main flex items-center gap-x-2 justify-between px-2`}
 			onChange={(e) => onChange(e.target.value)}
 			value={val}
 		/>

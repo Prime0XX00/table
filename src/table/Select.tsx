@@ -39,7 +39,7 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 
 	const trigger = useMemo(
 		() => (
-			<div className="h-8.5 min-w-16 w-fit rounded-sm border border-border hover:bg-main-hover bg-main cursor-pointer flex items-center gap-x-2 justify-between px-2">
+			<div className="h-element min-w-16 w-fit rounded-sm border border-border hover:bg-main-hover bg-main cursor-pointer flex items-center gap-x-2 justify-between px-2">
 				<span>
 					{selectedOption ? selectedOption.display : "Auswählen..."}
 				</span>
@@ -58,7 +58,7 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 						option.value == selectedOption.value
 							? "bg-accent/10 hover:bg-accent/15"
 							: "hover:bg-main-hover"
-					} min-h-8.5 flex gap-x-2 px-2 items-center`}
+					} min-h-element flex gap-x-2 px-2 items-center`}
 				>
 					<Checkbox
 						checked={option.value == selectedOption.value}

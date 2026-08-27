@@ -53,7 +53,7 @@ function TableSearchField<RowType>({
 
 			<div
 				ref={searchFieldRef}
-				className={`${expanded ? "max-w-50 w-full opacity-100 px-2" : "max-w-0 w-full opacity-0 px-0 pointer-events-none"} min-w-7.5 transition-all rounded-sm border border-border bg-main h-8.5 flex gap-x-2 items-center`}
+				className={`${expanded ? "max-w-50 w-full opacity-100 px-2" : "max-w-0 w-full opacity-0 px-0 pointer-events-none"} min-w-7.5 transition-all rounded-sm border border-border bg-main h-element flex gap-x-2 items-center`}
 			>
 				<SearchIcon
 					size={18}

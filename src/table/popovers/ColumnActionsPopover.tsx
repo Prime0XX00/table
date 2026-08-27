@@ -63,7 +63,7 @@ function PopoverContent<RowType>({
 		<div className="flex flex-col min-w-20">
 			<div
 				onClick={handleTogglePin}
-				className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
+				className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 			>
 				{props.columnState?.pinned ? (
 					<>
@@ -85,7 +85,7 @@ function PopoverContent<RowType>({
 				props.sorting.column?.field != props.column.field) && (
 				<div
 					onClick={handleSortAsc}
-					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
+					className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 				>
 					<MoveUpIcon size={18}></MoveUpIcon>
 					<span>Aufsteigend sortieren</span>
@@ -97,7 +97,7 @@ function PopoverContent<RowType>({
 				props.sorting.column?.field != props.column.field) && (
 				<div
 					onClick={handleSortDesc}
-					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
+					className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 				>
 					<MoveDownIcon size={18}></MoveDownIcon>
 					<span>Absteigend sortieren</span>
@@ -107,7 +107,7 @@ function PopoverContent<RowType>({
 			{props.sorting.column?.field == props.column.field && (
 				<div
 					onClick={handleSortRemove}
-					className="h-8.5 flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
+					className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
 				>
 					<MinusIcon size={18}></MinusIcon>
 					<span>Sortierung entfernen</span>

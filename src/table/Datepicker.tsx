@@ -141,7 +141,7 @@ const DatePickerCalendar: React.FC<DatePickerCalendarProps> = ({
 							type="button"
 							onClick={() => handleSelectDay(day)}
 							className={[
-								"w-8.5 h-8.5 text-sm rounded-full flex items-center justify-center cursor-pointer",
+								"w-element h-element text-sm rounded-full flex items-center justify-center cursor-pointer",
 								isCurrentMonth ? "text-text" : "text-text/30",
 								isSelected
 									? "bg-accent text-main!"
