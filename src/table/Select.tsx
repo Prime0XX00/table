@@ -58,7 +58,7 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 						option.value == selectedOption.value
 							? "bg-accent/10 hover:bg-accent/15"
 							: "hover:bg-main-hover"
-					} h-8.5 flex gap-x-2 px-2 items-center`}
+					} min-h-8.5 flex gap-x-2 px-2 items-center`}
 				>
 					<Checkbox
 						checked={option.value == selectedOption.value}
@@ -72,7 +72,9 @@ const Select: React.FC<SelectProps> = ({ ...props }) => {
 
 	return (
 		<Popover trigger={trigger}>
-			<div className="flex flex-col min-w-20">{options}</div>
+			<div className="flex flex-col min-w-20 max-h-50 overflow-y-auto">
+				{options}
+			</div>
 		</Popover>
 	);
 };

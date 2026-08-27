@@ -171,7 +171,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 	value = null,
 	onChange,
 	placeholder = "Datum wählen",
-	minYear = new Date().getFullYear() - 100,
+	minYear = new Date().getFullYear() - 20,
 	maxYear = new Date().getFullYear() + 10,
 	formatDate = formatDateDefault,
 	disabled = false,
