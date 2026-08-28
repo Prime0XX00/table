@@ -1,40 +1,23 @@
 import Table from "./table/Table";
 import Checkbox from "./table/Checkbox";
-
-type Article = {
-	id: number;
-	data: number;
-	percent: number;
-	status: string;
-	active: boolean;
-	date: Date;
-};
-
-const status = [
-	"Ausgeliefert",
-	"Unterwegs",
-	"Lager",
-	"Entladepuffer",
-	"Reparatur",
-	"Unbekannt",
-];
-
-const rows: Article[] = Array.from({ length: 10000 }).map((_, index) => ({
-	id: index,
-	data: Number((100 * Math.random()).toFixed(2)),
-	percent: Number((100 * Math.random()).toFixed(2)),
-	status: status[Math.ceil(Math.random() * 6) - 1],
-	active: index % 3 == 0,
-	date: new Date(new Date().valueOf() - Math.random() * 1e12),
-}));
+import { type Article } from "./examples/types";
+import Basic from "./examples/Basic";
+import { rows } from "./examples/data";
 
 function App() {
 	return (
 		<div className="py-10 flex flex-col gap-y-10 min-h-screen">
+			<Basic></Basic>
 			<div className="min-w-100 w-fit px-10 max-w-screen">
 				<Table<Article>
 					title="Artikeldaten"
 					rows={rows}
+					rowsPerPageOptions={[
+						{
+							value: 5,
+							display: "5",
+						},
+					]}
 					columns={[
 						{
 							field: "id",

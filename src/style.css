@@ -19,6 +19,10 @@
 	--opacity-disabled: 50%;
 }
 
+html {
+	scrollbar-gutter: stable;
+}
+
 /* @theme {
 	--color-main: var(--color-gray-900);
 	--color-main-hover: var(--color-gray-800);
