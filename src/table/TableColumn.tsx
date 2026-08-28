@@ -32,7 +32,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 			className={`flex flex-col h-fit`}
 		>
 			{/* Header-Zelle */}
-			<div className="h-12 border-b border-border">
+			<div className="h-table-header border-b border-border">
 				<HeaderCell
 					key={String(props.column.field)}
 					container={headerElement}

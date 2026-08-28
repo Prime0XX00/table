@@ -11,6 +11,7 @@
 	--color-tooltip-text: var(--color-slate-200);
 
 	--spacing-element: calc(var(--spacing) * 8.5);
+	--spacing-table-header: calc(var(--spacing) * 12);
 	--spacing-table-row: calc(var(--spacing) * 8.5);
 	--spacing-popover-row: calc(var(--spacing) * 8.5);
 

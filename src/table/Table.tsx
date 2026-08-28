@@ -22,6 +22,7 @@ import TableColumn from "./TableColumn";
 import { FILTER_OPERATORS, initialColWidth } from "../consts";
 import Tooltip from "./Tooltip";
 import ExportPopover from "./popovers/ExportPopover";
+import EmptyTableColumn from "./EmptyTableColumn";
 
 interface TableProps<RowType extends Object> {
 	title: string;
@@ -789,6 +790,11 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 								dispatch={dispatch}
 							></TableColumn>
 						))}
+
+						<EmptyTableColumn
+							paginatedRowsAmount={paginatedRows.length}
+							rowsPerPage={state.rowsPerPage}
+						></EmptyTableColumn>
 					</div>
 				</div>
 
