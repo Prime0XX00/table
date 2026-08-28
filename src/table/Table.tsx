@@ -8,6 +8,7 @@ import {
 	type TableState,
 	type Column,
 	type SortState,
+	type FilterState,
 } from "../types";
 import TableSearchField from "./TableSearchField";
 import IconButton from "./IconButton";
@@ -29,6 +30,8 @@ interface TableProps<RowType extends Object> {
 	rowsPerPageOptions?: SelectOption[];
 	initialState?: {
 		sorting?: SortState<RowType>;
+		searchQuery?: string | undefined;
+		filtes?: FilterState<RowType>;
 	};
 }
 
@@ -78,7 +81,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 			direction: props.initialState?.sorting?.direction ?? undefined,
 		},
 		columns: initalColumnStates,
-		searchQuery: "",
+		searchQuery: props.initialState?.searchQuery ?? "",
 		filters: {
 			filters: [
 				{

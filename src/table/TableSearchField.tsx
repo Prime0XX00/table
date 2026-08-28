@@ -13,7 +13,7 @@ interface TableSearchFieldProps<RowType> {
 function TableSearchField<RowType>({
 	...props
 }: TableSearchFieldProps<RowType>) {
-	const [expanded, setExpanded] = useState<boolean>(false);
+	const [expanded, setExpanded] = useState<boolean>(props.searchQuery != "");
 
 	const searchFieldRef = useRef<HTMLDivElement>(null);
 

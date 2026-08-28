@@ -84,6 +84,7 @@ function InitState(): React.JSX.Element {
 							field: "title",
 							direction: "desc",
 						},
+						searchQuery: "Produkt 100",
 					}}
 				></Table>
 			</div>
