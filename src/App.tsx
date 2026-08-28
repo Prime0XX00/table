@@ -2,10 +2,31 @@ import Basic from "./examples/Basic";
 import Custom from "./examples/Custom";
 import ExampleBox from "./examples/ExampleBox";
 import InitState from "./examples/InitState";
+import TextBox from "./examples/TextBox";
 
 function App() {
 	return (
 		<div className="py-10 flex flex-col gap-y-10 min-h-screen">
+			<TextBox>
+				<p>
+					Die Data-Grid Komponente bietet eine tabellenartige Ansicht
+					auf gewählte Daten und erlaubt es, diese zu sortieren,
+					anders zu rendern, in diesen zu suchen, sie zu filtern und
+					zu exportieren.
+					<br></br>
+					In den folgenden kleinen Beispielen werden die Funktionen
+					knapp aufgezeigt.
+					<br></br>
+					<br></br>
+					<a
+						href="https://github.com/Prime0XX00/table"
+						className="text-accent"
+						target="_blank"
+					>
+						GitHub Code
+					</a>
+				</p>
+			</TextBox>
 			<ExampleBox
 				description={
 					<p>
