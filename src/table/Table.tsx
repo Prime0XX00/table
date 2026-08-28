@@ -17,7 +17,6 @@ import FilterPopover from "./popovers/FilterPopover";
 import ColumnsSettingsPopover from "./popovers/ColumnsSettingsPopover";
 import DividerX from "./DividerX";
 import TableColumn from "./TableColumn";
-import EmptyTableColumn from "./EmptyTableColumn";
 import { FILTER_OPERATORS, initialColWidth } from "../consts";
 import Tooltip from "./Tooltip";
 import ExportPopover from "./popovers/ExportPopover";
@@ -769,11 +768,6 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 								dispatch={dispatch}
 							></TableColumn>
 						))}
-
-						<EmptyTableColumn
-							paginatedRowsAmount={paginatedRows.length}
-							rowsPerPage={state.rowsPerPage}
-						></EmptyTableColumn>
 					</div>
 				</div>
 

@@ -29,7 +29,7 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 	return (
 		<div
 			ref={setHeaderElement}
-			className={`flex flex-col`}
+			className={`flex flex-col h-fit`}
 		>
 			{/* Header-Zelle */}
 			<div className="h-12 border-b border-border">
@@ -68,9 +68,6 @@ function TableColumn<RowType>({ ...props }: ColumnProps<RowType>) {
 				}).map((_, rowIndex) => (
 					<EmptyRow key={`row-empty-${rowIndex}`}></EmptyRow>
 				))}
-
-			{/* Footer Zelle */}
-			<div className="h-table-row flex items-center justify-between px-2 border-t border-border w-full min-w-min-cell-w"></div>
 		</div>
 	);
 }
