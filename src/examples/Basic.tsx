@@ -5,9 +5,14 @@ import { type Article } from "./types";
 function Basic(): React.JSX.Element {
 	return (
 		<>
+			<p className="px-10">
+				Standard-Einstellungen des Grids. <br></br>
+				Die Daten werden einfach nur angezeigt, wie sie der Komponente
+				übergeben wurden. <br></br>
+			</p>
 			<div className="min-w-100 w-fit px-10 max-w-screen">
 				<Table<Article>
-					title="Artikeldaten"
+					title="Basic Grid"
 					rows={rows}
 					columns={[
 						{
