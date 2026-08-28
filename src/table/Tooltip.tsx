@@ -69,8 +69,8 @@ const Tooltip: React.FC<TooltipProps> = ({
 			triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
 		const top =
 			placement === "top"
-				? triggerRect.top - tooltipRect.height - 6
-				: triggerRect.top + triggerRect.height + 6;
+				? triggerRect.top - tooltipRect.height - 6 + window.scrollY
+				: triggerRect.top + triggerRect.height + 6 + window.scrollY;
 
 		setPosition({ left, top });
 	}, [visible, placement]);

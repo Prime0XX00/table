@@ -88,8 +88,12 @@ const Popover = forwardRef<HTMLElement, PopoverProps>(
 			const triggerRect = triggerRef.current.getBoundingClientRect();
 			const popoverRect = popoverRef.current.getBoundingClientRect();
 			setPosition({
-				left: triggerRect.left + triggerRect.width - popoverRect.width,
-				top: triggerRect.top + triggerRect.height + 4,
+				left:
+					triggerRect.left +
+					triggerRect.width -
+					popoverRect.width +
+					window.scrollX,
+				top: triggerRect.top + triggerRect.height + 4 + window.scrollY,
 			});
 		}, [visible]);
 
