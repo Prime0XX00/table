@@ -1,5 +1,7 @@
+import { FILTER_OPERATORS } from "../consts";
 import Checkbox from "../table/Checkbox";
 import Table from "../table/Table";
+import type { FilterOperator } from "../types";
 import { rows } from "./data";
 import type { Article } from "./types";
 
@@ -81,10 +83,26 @@ function InitState(): React.JSX.Element {
 					]}
 					initialState={{
 						sorting: {
-							field: "title",
+							field: "percent",
 							direction: "desc",
 						},
-						searchQuery: "Produkt 100",
+						filters: {
+							filters: [
+								{
+									field: "carrier",
+									operator: FILTER_OPERATORS["string"]
+										.E as FilterOperator,
+									value: "DHL",
+								},
+								{
+									field: "active",
+									operator: FILTER_OPERATORS["boolean"]
+										.E as FilterOperator,
+									value: 1,
+								},
+							],
+							connection: "and",
+						},
 					}}
 				></Table>
 			</div>

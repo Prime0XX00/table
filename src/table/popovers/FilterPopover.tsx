@@ -53,10 +53,10 @@ function PopoverContent<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 			payload: {
 				filter: {
 					...filter,
-					column:
+					field:
 						props.columns.find(
 							(col) => col.field == (fieldValue as keyof RowType),
-						) ?? props.columns[0],
+						)?.field ?? props.columns[0].field,
 				},
 
 				index: filterIndex,
@@ -106,88 +106,93 @@ function PopoverContent<RowType>({ ...props }: FilterPopoverProps<RowType>) {
 
 	return (
 		<div className="flex flex-col gap-y-2">
-			{props.filters.filters.map((filter, index) => (
-				<div
-					className="flex gap-x-2 items-center px-2"
-					key={`filter-${index}`}
-				>
-					<Tooltip
-						trigger={
-							<IconButton
-								icon="x"
-								onClick={() => handleDelete(index)}
-							></IconButton>
-						}
-					>
-						Löschen
-					</Tooltip>
+			{props.filters.filters.map((filter, index) => {
+				const col = props.columns.find(
+					(column) => column.field == filter.field,
+				);
+				if (!col) return;
 
-					<Select
-						options={props.columns.map((col) => ({
-							value: col.field as string | number,
-							display: col.title,
-						}))}
-						value={String(filter.column.field)}
-						onChange={(value) =>
-							handleColChange(filter, value, index)
-						}
-					></Select>
-					<Select
-						options={Object.values(
-							FILTER_OPERATORS[
-								props.filters.filters[index].column.dataType
-							],
-						).map((operator) => ({
-							value: operator,
-							display: operator,
-						}))}
-						value={filter.operator}
-						onChange={(value) =>
-							handleOperatorChange(filter, value, index)
-						}
-					></Select>
-					{filter.column.dataType == "boolean" ? (
+				return (
+					<div
+						className="flex gap-x-2 items-center px-2"
+						key={`filter-${index}`}
+					>
+						<Tooltip
+							trigger={
+								<IconButton
+									icon="x"
+									onClick={() => handleDelete(index)}
+								></IconButton>
+							}
+						>
+							Löschen
+						</Tooltip>
+
 						<Select
-							options={[
-								{
-									value: "",
-									display: "-----",
-								},
-								{
-									value: "1",
-									display: "WAHR",
-								},
-								{
-									value: "0",
-									display: "FALSCH",
-								},
-							]}
-							value={String(filter.value)}
+							options={props.columns.map((col) => ({
+								value: col.field as string | number,
+								display: col.title,
+							}))}
+							value={String(filter.field)}
 							onChange={(value) =>
-								handleValueChange(filter, value, index)
+								handleColChange(filter, value, index)
 							}
 						></Select>
-					) : filter.column.dataType == "date" ? (
-						<DatePicker
-							value={
-								filter.value instanceof Date
-									? filter.value
-									: null
-							}
+						<Select
+							options={Object.values(
+								FILTER_OPERATORS[col.dataType],
+							).map((operator) => ({
+								value: operator,
+								display: operator,
+							}))}
+							value={filter.operator}
 							onChange={(value) =>
-								handleValueChange(filter, value, index)
+								handleOperatorChange(filter, value, index)
 							}
-						></DatePicker>
-					) : (
-						<Input
-							value={String(filter.value)}
-							onValueChange={(value) =>
-								handleValueChange(filter, value, index)
-							}
-						></Input>
-					)}
-				</div>
-			))}
+						></Select>
+						{col.dataType == "boolean" ? (
+							<Select
+								options={[
+									{
+										value: "",
+										display: "-----",
+									},
+									{
+										value: "1",
+										display: "WAHR",
+									},
+									{
+										value: "0",
+										display: "FALSCH",
+									},
+								]}
+								value={String(filter.value)}
+								onChange={(value) =>
+									handleValueChange(filter, value, index)
+								}
+							></Select>
+						) : col.dataType == "date" ? (
+							<DatePicker
+								value={
+									filter.value instanceof Date
+										? filter.value
+										: null
+								}
+								onChange={(value) =>
+									handleValueChange(filter, value, index)
+								}
+							></DatePicker>
+						) : (
+							<Input
+								value={String(filter.value)}
+								onValueChange={(value) =>
+									handleValueChange(filter, value, index)
+								}
+							></Input>
+						)}
+					</div>
+				);
+			})}
 
 			<div className="border-t border-border w-full"></div>
 

@@ -31,7 +31,7 @@ interface TableProps<RowType extends Object> {
 	initialState?: {
 		sorting?: SortState<RowType>;
 		searchQuery?: string | undefined;
-		filtes?: FilterState<RowType>;
+		filters: FilterState<RowType>;
 	};
 }
 
@@ -82,10 +82,10 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		},
 		columns: initalColumnStates,
 		searchQuery: props.initialState?.searchQuery ?? "",
-		filters: {
+		filters: props.initialState?.filters ?? {
 			filters: [
 				{
-					column: columns[0],
+					field: columns[0].field,
 					operator: Object.values(
 						FILTER_OPERATORS[columns[0].dataType],
 					)[0] as FilterOperator,
@@ -289,20 +289,23 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 			// Die Änderung an einem Filter händeln
 			// Hier kann die betroffene Spalte, der Filteroperand und der Wert angepasst werden
 			case "FILTER_CHANGE":
+				const col = columns.find(
+					(column) => column.field == action.payload.filter.field,
+				);
+				if (!col) return state;
+
 				// Guckt ob der übergebene Operator zum Datentyp passt
 				// Falls nicht, wird der erste mögliche Operator des Typs geholt
 				const newOperator = Object.values(
-					FILTER_OPERATORS[action.payload.filter.column.dataType],
+					FILTER_OPERATORS[col.dataType],
 				).includes(action.payload.filter.operator)
 					? action.payload.filter.operator
 					: (Object.values(
-							FILTER_OPERATORS[
-								action.payload.filter.column.dataType
-							],
+							FILTER_OPERATORS[col.dataType],
 						)[0] as FilterOperator);
 
 				const newFilter: Filter<RowType> = {
-					column: action.payload.filter.column,
+					field: action.payload.filter.field,
 					operator: newOperator,
 					value: action.payload.filter.value,
 				};
@@ -343,7 +346,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 							...state.filters,
 							filters: [
 								{
-									column: columns[0],
+									field: columns[0].field,
 									operator: Object.values(
 										FILTER_OPERATORS[columns[0].dataType],
 									)[0] as FilterOperator,
@@ -376,7 +379,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 						filters: [
 							...state.filters.filters,
 							{
-								column: columns[0],
+								field: columns[0].field,
 								operator: Object.values(
 									FILTER_OPERATORS[columns[0].dataType],
 								)[0] as FilterOperator,
@@ -394,7 +397,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 						...state.filters,
 						filters: [
 							{
-								column: columns[0],
+								field: columns[0].field,
 								operator: Object.values(
 									FILTER_OPERATORS[columns[0].dataType],
 								)[0] as FilterOperator,
@@ -478,20 +481,23 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		row: TableRow<RowType>,
 		filter: Filter<RowType>,
 	): boolean {
-		const cellValue = row[filter.column.field];
+		const cellValue = row[filter.field];
 
-		switch (filter.column.dataType) {
+		const col = columns.find((column) => column.field == filter.field);
+		if (!col) return true;
+
+		switch (col.dataType) {
 			case "string": {
 				const stringCellValue = String(cellValue).toUpperCase();
 				const stringFilterValue = String(filter.value).toUpperCase();
 				switch (filter.operator) {
-					case FILTER_OPERATORS[filter.column.dataType].E:
+					case FILTER_OPERATORS[col.dataType].E:
 						return stringCellValue == stringFilterValue;
-					case FILTER_OPERATORS[filter.column.dataType].NE:
+					case FILTER_OPERATORS[col.dataType].NE:
 						return stringCellValue != stringFilterValue;
-					case FILTER_OPERATORS[filter.column.dataType].C:
+					case FILTER_OPERATORS[col.dataType].C:
 						return stringCellValue.includes(stringFilterValue);
-					case FILTER_OPERATORS[filter.column.dataType].NC:
+					case FILTER_OPERATORS[col.dataType].NC:
 						return !stringCellValue.includes(stringFilterValue);
 					default:
 						return true;
@@ -499,17 +505,17 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 			}
 			case "number": {
 				switch (filter.operator) {
-					case FILTER_OPERATORS[filter.column.dataType].E:
+					case FILTER_OPERATORS[col.dataType].E:
 						return cellValue == filter.value;
-					case FILTER_OPERATORS[filter.column.dataType].LT:
+					case FILTER_OPERATORS[col.dataType].LT:
 						return cellValue < filter.value;
-					case FILTER_OPERATORS[filter.column.dataType].LTE:
+					case FILTER_OPERATORS[col.dataType].LTE:
 						return cellValue <= filter.value;
-					case FILTER_OPERATORS[filter.column.dataType].GT:
+					case FILTER_OPERATORS[col.dataType].GT:
 						return cellValue > filter.value;
-					case FILTER_OPERATORS[filter.column.dataType].GTE:
+					case FILTER_OPERATORS[col.dataType].GTE:
 						return cellValue >= filter.value;
-					case FILTER_OPERATORS[filter.column.dataType].NE:
+					case FILTER_OPERATORS[col.dataType].NE:
 						return cellValue != filter.value;
 					default:
 						return true;
@@ -517,7 +523,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 			}
 			case "boolean": {
 				switch (filter.operator) {
-					case FILTER_OPERATORS[filter.column.dataType].E:
+					case FILTER_OPERATORS[col.dataType].E:
 						return filter.value === ""
 							? true
 							: cellValue == filter.value;
@@ -527,9 +533,9 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 			}
 			case "date": {
 				switch (filter.operator) {
-					case FILTER_OPERATORS[filter.column.dataType].LT:
+					case FILTER_OPERATORS[col.dataType].LT:
 						return cellValue <= filter.value;
-					case FILTER_OPERATORS[filter.column.dataType].GT:
+					case FILTER_OPERATORS[col.dataType].GT:
 						return cellValue >= filter.value;
 					default:
 						return true;

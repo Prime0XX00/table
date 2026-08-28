@@ -52,7 +52,7 @@ export interface FilterState<RowType> {
 }
 
 export interface Filter<RowType> {
-	column: Column<RowType>;
+	field: keyof RowType;
 	operator: FilterOperator;
 	value: string | number | boolean | Date;
 }
