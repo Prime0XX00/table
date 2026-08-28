@@ -9,7 +9,7 @@ const IconButton: React.FC<IconButtonProps> = ({ icon, ...props }) => {
 	return (
 		<button
 			{...props}
-			className={`${props.className} disabled:opacity-disabled not-disabled:hover:bg-main-hover not-disabled:cursor-pointer p-1.5 rounded-full bg-transparent`}
+			className={`${props.className} disabled:opacity-disabled not-disabled:hover:bg-main-hover not-disabled:cursor-pointer rounded-full bg-transparent p-1.5 flex items-center justify-center size-element`}
 		>
 			<DynamicIcon
 				name={icon}
