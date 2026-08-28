@@ -14,6 +14,8 @@ function App() {
 					anders zu rendern, in diesen zu suchen, sie zu filtern und
 					zu exportieren.
 					<br></br>
+					Das Design und der Aufbau ist von MUI inspiriert.
+					<br></br>
 					In den folgenden kleinen Beispielen werden die Funktionen
 					knapp aufgezeigt.
 					<br></br>
