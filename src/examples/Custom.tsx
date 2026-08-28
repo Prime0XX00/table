@@ -3,24 +3,33 @@ import Table from "../table/Table";
 import { rows } from "./data";
 import type { Article } from "./types";
 
-function Renderer(): React.JSX.Element {
+function Custom(): React.JSX.Element {
 	return (
 		<>
 			<p className="px-10">
-				Visuelle Darstellung der Werte. <br></br>
-				Einzelne Spalten können eine Render-Funktion nutzen, um eigene
-				React-Komponenten oder Nodes zu rendern, statt der eigentlichen
-				Daten. <br></br>
+				In diesem Beispiel wurden der Aktivitätsstatus, der Lagerstatus,
+				der Fortschritt und das Datum mit einer Render-Funktion
+				versehen, um den Inhalt individuell zu gestalten und eine Node
+				statt der eigentlichen Daten anzuzeigen.
+				<br></br>
+				Die Breiten einiger Spalten wurden zudem veändert.
+				<br></br>
+				Außerdem wurde das Produkt und der Aktivitätsstatus links
+				angepinnt. Wenn die Tabelle breit genug ist und der Inhalt
+				scrollbar wird, sind diese Spalten immer links sichtbar.
+				<br></br>
 			</p>
 			<div className="min-w-100 w-fit px-10 max-w-screen">
 				<Table<Article>
-					title="Artikeldaten"
+					title="Custom Grid"
 					rows={rows}
 					columns={[
 						{
-							field: "id",
-							title: "ID",
-							dataType: "number",
+							field: "title",
+							title: "Titel",
+							dataType: "string",
+							isPinned: true,
+							initialWidth: 100,
 						},
 						{
 							field: "data",
@@ -31,6 +40,11 @@ function Renderer(): React.JSX.Element {
 							field: "status",
 							title: "Status",
 							dataType: "string",
+							render: (value) => (
+								<div className="bg-accent/10 rounded-full px-2 w-fit h-fit">
+									{String(value)}
+								</div>
+							),
 						},
 						{
 							field: "percent",
@@ -44,6 +58,7 @@ function Renderer(): React.JSX.Element {
 									></div>
 								</div>
 							),
+							initialWidth: 360,
 						},
 						{
 							field: "active",
@@ -55,6 +70,8 @@ function Renderer(): React.JSX.Element {
 									readonly
 								></Checkbox>
 							),
+							isPinned: true,
+							initialWidth: 100,
 						},
 						{
 							field: "date",
@@ -63,6 +80,12 @@ function Renderer(): React.JSX.Element {
 							render: (rawDate) => {
 								return rawDate.toLocaleString();
 							},
+							initialWidth: 200,
+						},
+						{
+							field: "carrier",
+							title: "Spedition",
+							dataType: "string",
 						},
 					]}
 				></Table>
@@ -71,4 +94,4 @@ function Renderer(): React.JSX.Element {
 	);
 }
 
-export default Renderer;
+export default Custom;

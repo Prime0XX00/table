@@ -16,9 +16,9 @@ function Basic(): React.JSX.Element {
 					rows={rows}
 					columns={[
 						{
-							field: "id",
-							title: "ID",
-							dataType: "number",
+							field: "title",
+							title: "Titel",
+							dataType: "string",
 						},
 						{
 							field: "data",

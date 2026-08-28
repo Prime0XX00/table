@@ -14,8 +14,6 @@
 	--spacing-table-row: calc(var(--spacing) * 8.5);
 	--spacing-popover-row: calc(var(--spacing) * 8.5);
 
-	--spacing-min-cell-w: calc(var(--spacing) * 28);
-
 	--opacity-disabled: 50%;
 }
 

@@ -572,8 +572,14 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					const valueB = String(rowB[col.field]);
 
 					return state.sorting.direction == "asc"
-						? valueA.localeCompare(valueB)
-						: valueB.localeCompare(valueA);
+						? valueA.localeCompare(valueB, undefined, {
+								numeric: true,
+								sensitivity: "base",
+							})
+						: valueB.localeCompare(valueA, undefined, {
+								numeric: true,
+								sensitivity: "base",
+							});
 				});
 				return newRows;
 			}

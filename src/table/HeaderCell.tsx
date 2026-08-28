@@ -60,11 +60,11 @@ function HeaderCell<RowType>({ ...props }: HeaderCellProps<RowType>) {
 	);
 
 	return (
-		<div className={`group h-full pl-2 flex min-w-min-cell-w`}>
+		<div className={`group h-full pl-2 flex`}>
 			<div
 				className={`relative gap-x-2 h-full items-center w-full grid ${props.column.isSortable || props.column.hasOptions ? "grid-cols-[auto_1fr]" : "grid-cols-[1fr]"}`}
 			>
-				<span className="overflow-hidden text-ellipsis">
+				<span className="overflow-hidden text-ellipsis text-nowrap">
 					{props.column.title}
 				</span>
 
