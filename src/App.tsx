@@ -20,7 +20,7 @@ function App() {
 					<br></br>
 					<a
 						href="https://github.com/Prime0XX00/table"
-						className="text-accent"
+						className="text-accent hover:underline"
 						target="_blank"
 					>
 						GitHub Code
