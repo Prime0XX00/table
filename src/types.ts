@@ -30,7 +30,7 @@ export type TableRow<RowType> = RowType & {
 };
 
 export interface SortState<RowType> {
-	column: Column<RowType> | undefined;
+	field: keyof RowType | undefined;
 	direction: "asc" | "desc" | undefined;
 }
 

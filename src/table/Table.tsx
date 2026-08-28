@@ -7,6 +7,7 @@ import {
 	type TableRow,
 	type TableState,
 	type Column,
+	type SortState,
 } from "../types";
 import TableSearchField from "./TableSearchField";
 import IconButton from "./IconButton";
@@ -26,6 +27,9 @@ interface TableProps<RowType extends Object> {
 	rows: Array<RowType> | undefined;
 	columns: Column<RowType>[];
 	rowsPerPageOptions?: SelectOption[];
+	initialState?: {
+		sorting?: SortState<RowType>;
+	};
 }
 
 function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
@@ -70,8 +74,8 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 		selectedPage: 0,
 		rowsPerPage: Number(rowsPerPageOptions[0].value),
 		sorting: {
-			column: undefined,
-			direction: undefined,
+			field: props.initialState?.sorting?.field ?? undefined,
+			direction: props.initialState?.sorting?.direction ?? undefined,
 		},
 		columns: initalColumnStates,
 		searchQuery: "",
@@ -111,12 +115,12 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 				// Wenn neues Feld ausgewählt wird
 				// Da nur ein Richtungs-State für die gesamte Tabelle existiert, wird sobald die Spalte gewechselt wird
 				// der State zurück auf ASC gesetzt
-				if (state.sorting.column?.field != column.field) {
+				if (state.sorting.field != column.field) {
 					return {
 						...state,
 						sorting: {
 							...state.sorting,
-							column: column,
+							field: column.field,
 							direction: "asc",
 						},
 					};
@@ -129,7 +133,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 							...state,
 							sorting: {
 								...state.sorting,
-								column: column,
+								field: column.field,
 								direction: "desc",
 							},
 						};
@@ -138,7 +142,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 							...state,
 							sorting: {
 								...state.sorting,
-								column: column,
+								field: column.field,
 								direction: "asc",
 							},
 						};
@@ -155,7 +159,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					...state,
 					sorting: {
 						...state.sorting,
-						column: column,
+						field: column.field,
 						direction: "asc",
 					},
 				};
@@ -171,7 +175,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					...state,
 					sorting: {
 						...state.sorting,
-						column: column,
+						field: column.field,
 						direction: "desc",
 					},
 				};
@@ -187,7 +191,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 					...state,
 					sorting: {
 						...state.sorting,
-						column: undefined,
+						field: undefined,
 						direction: undefined,
 					},
 				};
@@ -542,19 +546,21 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 	// Sortierung anhand der ausgewählten Spalte und Richtung
 	const sortedRows = useMemo(() => {
 		if (
-			state.sorting.column == undefined ||
+			state.sorting.field == undefined ||
 			state.sorting.direction == undefined
 		)
 			return [...filteredRows];
 
-		if (state.sorting.column.field === "SELECT") return [...filteredRows];
-
-		if (!state.columns.get(state.sorting.column.field)?.visible)
+		if (!state.columns.get(state.sorting.field)?.visible)
 			return [...filteredRows];
 
-		const col = state.sorting.column as Column<RowType, keyof RowType>;
+		const col = columns.find(
+			(column) => column.field == state.sorting.field,
+		);
 
-		switch (state.sorting.column.dataType) {
+		if (!col) return [...filteredRows];
+
+		switch (col.dataType) {
 			case "number": {
 				const newRows = [...(filteredRows ?? [])].sort((rowA, rowB) => {
 					const valueA = Number(rowA[col.field]);
@@ -609,7 +615,7 @@ function Table<RowType extends Object>({ ...props }: TableProps<RowType>) {
 			default:
 				return [...filteredRows];
 		}
-	}, [state.sorting.column, state.sorting.direction, filteredRows]);
+	}, [state.sorting.field, state.sorting.direction, filteredRows]);
 
 	// Zuschneidung der angezeigten Reihen anhad der momentanen Seite
 	const paginatedRows = useMemo(() => {

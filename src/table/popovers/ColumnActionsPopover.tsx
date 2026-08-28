@@ -80,9 +80,9 @@ function PopoverContent<RowType>({
 
 			<div className="border-t border-border w-full my-2"></div>
 
-			{((props.sorting.column?.field == props.column.field &&
+			{((props.sorting?.field == props.column.field &&
 				props.sorting.direction == "desc") ||
-				props.sorting.column?.field != props.column.field) && (
+				props.sorting?.field != props.column.field) && (
 				<div
 					onClick={handleSortAsc}
 					className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
@@ -92,9 +92,9 @@ function PopoverContent<RowType>({
 				</div>
 			)}
 
-			{((props.sorting.column?.field == props.column.field &&
+			{((props.sorting?.field == props.column.field &&
 				props.sorting.direction == "asc") ||
-				props.sorting.column?.field != props.column.field) && (
+				props.sorting?.field != props.column.field) && (
 				<div
 					onClick={handleSortDesc}
 					className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
@@ -104,7 +104,7 @@ function PopoverContent<RowType>({
 				</div>
 			)}
 
-			{props.sorting.column?.field == props.column.field && (
+			{props.sorting?.field == props.column.field && (
 				<div
 					onClick={handleSortRemove}
 					className="h-popover-row flex gap-x-2 px-2 items-center justify-between hover:bg-main-hover cursor-pointer"
@@ -128,7 +128,7 @@ function ColumnActionsPopover<RowType>({
 					trigger={
 						<IconButton
 							icon="ellipsis-vertical"
-							className={`${props.sorting.column?.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
+							className={`${props.sorting?.field != props.column.field ? "group-hover:opacity-100 opacity-0" : "opacity-100"}`}
 						></IconButton>
 					}
 				>
